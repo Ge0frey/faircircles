@@ -18,10 +18,12 @@ pub mod faircircle_solana_program {
         contribution_amount: u64,
         period_length: i64,  // in seconds
         min_fair_score: u8,  // minimum FairScore tier required (0-100 scale)
+        creator_fair_score: u8,  // creator's FairScore
     ) -> Result<()> {
         require!(name.len() <= CIRCLE_NAME_MAX_LEN, FairCircleError::NameTooLong);
         require!(contribution_amount > 0, FairCircleError::InvalidContributionAmount);
         require!(period_length > 0, FairCircleError::InvalidPeriodLength);
+        require!(creator_fair_score >= min_fair_score, FairCircleError::InsufficientFairScore);
 
         let circle = &mut ctx.accounts.circle;
         let clock = Clock::get()?;
@@ -42,12 +44,12 @@ pub mod faircircle_solana_program {
 
         // Creator automatically joins as first member
         circle.members[0] = ctx.accounts.creator.key();
-        circle.fair_scores[0] = 0; // Will be set when starting
+        circle.fair_scores[0] = creator_fair_score;
         circle.contributions[0] = [false; MAX_MEMBERS];
         circle.has_claimed[0] = false;
         circle.member_count = 1;
 
-        msg!("FairCircle '{}' created by {}", circle.name, circle.creator);
+        msg!("FairCircle '{}' created by {} with FairScore {}", circle.name, circle.creator, creator_fair_score);
         Ok(())
     }
 

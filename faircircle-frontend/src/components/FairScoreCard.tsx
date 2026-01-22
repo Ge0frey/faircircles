@@ -154,8 +154,8 @@ export function FairScoreCard() {
         </h4>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex justify-between text-zinc-500">
-            <span>Wallet Age</span>
-            <span className="text-zinc-300">{fairScore.features.wallet_age_days} days</span>
+            <span>Wallet Age Score</span>
+            <span className="text-zinc-300">{fairScore.features.wallet_age_score}</span>
           </div>
           <div className="flex justify-between text-zinc-500">
             <span>Transactions</span>
