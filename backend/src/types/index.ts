@@ -32,7 +32,7 @@ export interface Features {
   no_instant_dumps: number;
   conviction_ratio: number;
   platform_diversity: number;
-  wallet_age_score: number;
+  wallet_age_days: number;
 }
 
 export interface FairScaleApiResponse {

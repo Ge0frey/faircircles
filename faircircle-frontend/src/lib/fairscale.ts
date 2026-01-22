@@ -27,6 +27,23 @@ export async function fetchFairScore(wallet: string, twitter?: string): Promise<
           tier: 'unrated',
           badges: [],
           last_updated: new Date().toISOString(),
+          features: {
+            lst_percentile_score: 0,
+            major_percentile_score: 0,
+            native_sol_percentile: 0,
+            stable_percentile_score: 0,
+            tx_count: 0,
+            active_days: 0,
+            median_gap_hours: 0,
+            tempo_cv: 0,
+            burst_ratio: 0,
+            net_sol_flow_30d: 0,
+            median_hold_days: 0,
+            no_instant_dumps: 0,
+            conviction_ratio: 0,
+            platform_diversity: 0,
+            wallet_age_days: 0,
+          },
         };
       }
       throw new Error(error.message || `Failed to fetch FairScore: ${response.statusText}`);
@@ -43,6 +60,23 @@ export async function fetchFairScore(wallet: string, twitter?: string): Promise<
         tier: 'unrated',
         badges: [],
         last_updated: new Date().toISOString(),
+        features: {
+          lst_percentile_score: 0,
+          major_percentile_score: 0,
+          native_sol_percentile: 0,
+          stable_percentile_score: 0,
+          tx_count: 0,
+          active_days: 0,
+          median_gap_hours: 0,
+          tempo_cv: 0,
+          burst_ratio: 0,
+          net_sol_flow_30d: 0,
+          median_hold_days: 0,
+          no_instant_dumps: 0,
+          conviction_ratio: 0,
+          platform_diversity: 0,
+          wallet_age_days: 0,
+        },
       };
     }
     throw error;

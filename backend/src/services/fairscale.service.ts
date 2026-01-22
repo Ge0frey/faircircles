@@ -44,10 +44,14 @@ export async function getFairScore(
   } catch (error) {
     if (error instanceof AxiosError) {
       if (error.response?.status === 401) {
-        throw new Error('Unauthorized: Invalid FairScale API key');
+        const err: any = new Error('Unauthorized: Invalid FairScale API key');
+        err.statusCode = 401;
+        throw err;
       }
       if (error.response?.status === 429) {
-        throw new Error('Rate limit exceeded. Please try again later.');
+        const err: any = new Error('Rate limit exceeded. Please try again later.');
+        err.statusCode = 429;
+        throw err;
       }
       if (error.response?.status === 404) {
         // Return default unrated response for wallets without a score
@@ -57,11 +61,31 @@ export async function getFairScore(
           tier: 'unrated',
           badges: [],
           last_updated: new Date().toISOString(),
+          features: {
+            lst_percentile_score: 0,
+            major_percentile_score: 0,
+            native_sol_percentile: 0,
+            stable_percentile_score: 0,
+            tx_count: 0,
+            active_days: 0,
+            median_gap_hours: 0,
+            tempo_cv: 0,
+            burst_ratio: 0,
+            net_sol_flow_30d: 0,
+            median_hold_days: 0,
+            no_instant_dumps: 0,
+            conviction_ratio: 0,
+            platform_diversity: 0,
+            wallet_age_days: 0,
+          },
         };
       }
-      throw new Error(
+      console.error('[ERROR] FairScale API error:', error.response?.data || error.message);
+      const err: any = new Error(
         `FairScale API error: ${error.response?.data?.message || error.message}`
       );
+      err.statusCode = error.response?.status || 500;
+      throw err;
     }
     throw error;
   }

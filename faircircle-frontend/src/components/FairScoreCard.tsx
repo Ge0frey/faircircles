@@ -154,20 +154,20 @@ export function FairScoreCard() {
         </h4>
         <div className="grid grid-cols-2 gap-2 text-sm">
           <div className="flex justify-between text-zinc-500">
-            <span>Wallet Age Score</span>
-            <span className="text-zinc-300">{fairScore.features.wallet_age_score}</span>
+            <span>Wallet Age</span>
+            <span className="text-zinc-300">{fairScore.features?.wallet_age_days || 0} days</span>
           </div>
           <div className="flex justify-between text-zinc-500">
             <span>Transactions</span>
-            <span className="text-zinc-300">{fairScore.features.tx_count}</span>
+            <span className="text-zinc-300">{fairScore.features?.tx_count || 0}</span>
           </div>
           <div className="flex justify-between text-zinc-500">
             <span>Active Days</span>
-            <span className="text-zinc-300">{fairScore.features.active_days}</span>
+            <span className="text-zinc-300">{fairScore.features?.active_days || 0}</span>
           </div>
           <div className="flex justify-between text-zinc-500">
             <span>Platform Diversity</span>
-            <span className="text-zinc-300">{fairScore.features.platform_diversity}</span>
+            <span className="text-zinc-300">{fairScore.features?.platform_diversity || 0}</span>
           </div>
         </div>
       </div>

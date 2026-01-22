@@ -41,7 +41,8 @@ export function useFairScore() {
     } else {
       setFairScore(null);
     }
-  }, [connected, publicKey, loadFairScore, setFairScore]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [connected, publicKey]); // Only re-run when wallet connection changes
 
   return {
     fairScore,

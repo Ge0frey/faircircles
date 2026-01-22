@@ -2,43 +2,40 @@ import { Request, Response, NextFunction } from 'express';
 import { config } from '../config/index.js';
 import type { ApiError } from '../types/index.js';
 
+interface CustomError extends Error {
+  statusCode?: number;
+}
+
 export function errorHandler(
-  err: Error,
+  err: CustomError,
   req: Request,
   res: Response,
   next: NextFunction
 ): void {
-  console.error(`[ERROR] ${err.message}`);
-  
-  if (config.nodeEnv === 'development') {
-    console.error(err.stack);
+  // Don't spam logs with rate limit errors
+  if (err.statusCode !== 429) {
+    console.error(`[ERROR] ${err.message}`);
+    if (config.nodeEnv === 'development') {
+      console.error(err.stack);
+    }
   }
+
+  // Use statusCode from error if available
+  const statusCode = err.statusCode || 500;
 
   // Default error response
   const apiError: ApiError = {
-    error: 'Internal Server Error',
+    error: statusCode === 429 ? 'Too Many Requests' : 
+           statusCode === 401 ? 'Unauthorized' :
+           statusCode === 404 ? 'Not Found' :
+           'Internal Server Error',
     message: config.nodeEnv === 'development' 
       ? err.message 
-      : 'An unexpected error occurred',
-    statusCode: 500,
+      : statusCode >= 500 ? 'An unexpected error occurred' : err.message,
+    statusCode,
   };
 
-  // Handle specific error types
-  if (err.message.includes('Unauthorized')) {
-    apiError.error = 'Unauthorized';
-    apiError.statusCode = 401;
-    apiError.message = err.message;
-  } else if (err.message.includes('Rate limit')) {
-    apiError.error = 'Too Many Requests';
-    apiError.statusCode = 429;
-    apiError.message = err.message;
-  } else if (err.message.includes('not found') || err.message.includes('404')) {
-    apiError.error = 'Not Found';
-    apiError.statusCode = 404;
-    apiError.message = err.message;
-  }
-
-  res.status(apiError.statusCode).json(apiError);
+  res.status(statusCode).json(apiError);
 }
 
 export function notFoundHandler(req: Request, res: Response): void {
