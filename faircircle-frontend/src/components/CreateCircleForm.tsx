@@ -44,7 +44,18 @@ export function CreateCircleForm() {
     setError('');
 
     try {
-      await createCircle(name.trim(), contributionNum, period, minFairScore);
+      // Pass the creator's FairScore when creating the circle
+      const creatorFairScore = fairScore?.fair_score || 0;
+      
+      // Verify creator meets minimum FairScore requirement
+      if (creatorFairScore < minFairScore) {
+        throw new Error(
+          `Your FairScore (${creatorFairScore}) is below the minimum requirement (${minFairScore}). ` +
+          'Please lower the minimum FairScore or improve your reputation.'
+        );
+      }
+      
+      await createCircle(name.trim(), contributionNum, period, minFairScore, creatorFairScore);
       setActiveTab('my-circles');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create circle');

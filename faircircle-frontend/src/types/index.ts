@@ -44,7 +44,7 @@ export interface FairScoreFeatures {
   no_instant_dumps: number;
   conviction_ratio: number;
   platform_diversity: number;
-  wallet_age_days: number;
+  wallet_age_score: number;
 }
 
 export type CircleStatus = 'Forming' | 'Active' | 'Completed' | 'Cancelled';

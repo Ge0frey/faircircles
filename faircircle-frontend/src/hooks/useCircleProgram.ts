@@ -64,7 +64,8 @@ export function useCircleProgram() {
     name: string,
     contributionAmount: number, // in SOL
     periodLength: number, // in seconds
-    minFairScore: number
+    minFairScore: number,
+    creatorFairScore: number
   ) => {
     if (!program || !wallet.publicKey) {
       throw new Error('Wallet not connected');
@@ -76,8 +77,19 @@ export function useCircleProgram() {
     const lamports = new BN(contributionAmount * LAMPORTS_PER_SOL);
 
     try {
+      // Check wallet balance before attempting transaction
+      const balance = await connection.getBalance(wallet.publicKey);
+      const balanceSOL = balance / LAMPORTS_PER_SOL;
+      
+      if (balanceSOL < 0.5) {
+        throw new Error(
+          `Insufficient balance. You have ${balanceSOL.toFixed(4)} SOL but need at least 0.5 SOL for account rent and fees. ` +
+          `Please visit https://faucet.solana.com to get devnet SOL.`
+        );
+      }
+
       const tx = await program.methods
-        .createCircle(name, lamports, new BN(periodLength), minFairScore)
+        .createCircle(name, lamports, new BN(periodLength), minFairScore, Math.round(creatorFairScore))
         .accounts({
           creator: wallet.publicKey,
           circle: circlePDA,
@@ -95,14 +107,27 @@ export function useCircleProgram() {
       return tx;
     } catch (error) {
       console.error('Failed to create circle:', error);
+      
+      let errorMessage = 'Unknown error';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        
+        // Check for specific error patterns
+        if (errorMessage.includes('debit an account')) {
+          errorMessage = 
+            'Insufficient SOL balance. You need at least 0.5 SOL for account creation. ' +
+            'Visit https://faucet.solana.com to get devnet SOL.';
+        }
+      }
+      
       addNotification({
         type: 'error',
         title: 'Failed to Create Circle',
-        message: error instanceof Error ? error.message : 'Unknown error',
+        message: errorMessage,
       });
       throw error;
     }
-  }, [program, wallet.publicKey, getCirclePDA, getEscrowPDA, addNotification]);
+  }, [program, wallet.publicKey, getCirclePDA, getEscrowPDA, addNotification, connection]);
 
   const joinCircle = useCallback(async (circleCreator: PublicKey, fairScore: number) => {
     if (!program || !wallet.publicKey) {
@@ -258,7 +283,9 @@ export function useCircleProgram() {
         members.push({
           address: circleAccount.members[i],
           fairScore: circleAccount.fairScores[i],
-          hasContributed: circleAccount.contributions[i][circleAccount.currentRound - 1] || false,
+          hasContributed: circleAccount.currentRound > 0 
+            ? circleAccount.contributions[i][circleAccount.currentRound - 1] || false
+            : false,
           hasClaimed: circleAccount.hasClaimed[i],
           payoutOrder: circleAccount.payoutOrder.indexOf(i),
         });

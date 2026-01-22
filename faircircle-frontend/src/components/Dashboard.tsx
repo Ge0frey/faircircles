@@ -6,6 +6,7 @@ import { CircleCard } from './CircleCard';
 import { CircleDetail } from './CircleDetail';
 import { CreateCircleForm } from './CreateCircleForm';
 import { FairScoreCard } from './FairScoreCard';
+import { WalletBalance } from './WalletBalance';
 import type { Circle } from '../types';
 import { 
   Compass, 
@@ -207,6 +208,7 @@ export function Dashboard() {
 
             {/* Sidebar */}
             <div className="space-y-6">
+              <WalletBalance />
               <FairScoreCard />
               
               {/* Quick Info */}

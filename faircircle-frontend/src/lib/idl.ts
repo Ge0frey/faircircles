@@ -101,7 +101,8 @@ export const IDL = {
         { "name": "name", "type": "string" },
         { "name": "contribution_amount", "type": "u64" },
         { "name": "period_length", "type": "i64" },
-        { "name": "min_fair_score", "type": "u8" }
+        { "name": "min_fair_score", "type": "u8" },
+        { "name": "creator_fair_score", "type": "u8" }
       ]
     },
     {

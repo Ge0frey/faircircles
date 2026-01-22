@@ -10,20 +10,43 @@ export async function fetchFairScore(wallet: string, twitter?: string): Promise<
     params.append('twitter', twitter);
   }
 
-  const response = await fetch(`${API_BASE_URL}/fairscale/score?${params}`);
+  try {
+    const response = await fetch(`${API_BASE_URL}/fairscale/score?${params}`);
 
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({}));
-    if (response.status === 401) {
-      throw new Error('Unauthorized: Backend API key configuration issue');
+    if (!response.ok) {
+      const error = await response.json().catch(() => ({}));
+      if (response.status === 401) {
+        throw new Error('Unauthorized: Backend API key configuration issue');
+      }
+      if (response.status === 429) {
+        // Return a default response for rate-limited requests instead of throwing
+        console.warn('Rate limit exceeded, returning default unrated score');
+        return {
+          wallet,
+          fair_score: 0,
+          tier: 'unrated',
+          badges: [],
+          last_updated: new Date().toISOString(),
+        };
+      }
+      throw new Error(error.message || `Failed to fetch FairScore: ${response.statusText}`);
     }
-    if (response.status === 429) {
-      throw new Error('Rate limit exceeded. Please try again later.');
+
+    return response.json();
+  } catch (error) {
+    // If it's a network error, return default response
+    if (error instanceof TypeError && error.message.includes('fetch')) {
+      console.warn('Network error, returning default unrated score');
+      return {
+        wallet,
+        fair_score: 0,
+        tier: 'unrated',
+        badges: [],
+        last_updated: new Date().toISOString(),
+      };
     }
-    throw new Error(error.message || `Failed to fetch FairScore: ${response.statusText}`);
+    throw error;
   }
-
-  return response.json();
 }
 
 /**
