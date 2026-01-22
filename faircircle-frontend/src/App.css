@@ -1,1 +1,90 @@
 @import "tailwindcss";
+
+/* Custom animations */
+@keyframes slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Wallet adapter styles overrides */
+.wallet-adapter-button {
+  background-color: rgb(39 39 42) !important;
+  border-radius: 12px !important;
+  font-family: inherit !important;
+}
+
+.wallet-adapter-button:hover {
+  background-color: rgb(63 63 70) !important;
+}
+
+.wallet-adapter-modal-wrapper {
+  background-color: rgb(24 24 27) !important;
+  border-radius: 20px !important;
+  border: 1px solid rgb(63 63 70) !important;
+}
+
+.wallet-adapter-modal-title {
+  color: white !important;
+  font-weight: 600 !important;
+}
+
+.wallet-adapter-modal-list li {
+  background-color: rgb(39 39 42) !important;
+  border-radius: 12px !important;
+}
+
+.wallet-adapter-modal-list li:hover {
+  background-color: rgb(63 63 70) !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgb(24 24 27);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgb(63 63 70);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgb(82 82 91);
+}
+
+/* Focus styles */
+*:focus-visible {
+  outline: 2px solid rgb(16 185 129);
+  outline-offset: 2px;
+}
+
+/* Selection */
+::selection {
+  background-color: rgb(16 185 129);
+  color: white;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Font smoothing */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
