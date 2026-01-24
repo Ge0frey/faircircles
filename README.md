@@ -681,10 +681,6 @@ FAIRSCALE_API_KEY=your_fairscale_api_key_here
 # CORS (frontend origin)
 CORS_ORIGINS=http://localhost:5173
 
-# Rate Limiting
-RATE_LIMIT_WINDOW_MS=60000
-RATE_LIMIT_MAX_REQUESTS=1000
-
 # Solana
 SOLANA_NETWORK=devnet
 SOLANA_RPC_URL=https://api.devnet.solana.com
@@ -829,8 +825,6 @@ Try connecting your wallet and creating a circle!
 | `FAIRSCALE_API_URL` | FairScale API base URL | `https://api.fairscale.xyz` |
 | `FAIRSCALE_API_KEY` | Your FairScale API key | **Required** |
 | `CORS_ORIGINS` | Allowed CORS origins (comma-separated) | `http://localhost:5173` |
-| `RATE_LIMIT_WINDOW_MS` | Rate limit window in milliseconds | `60000` (1 minute) |
-| `RATE_LIMIT_MAX_REQUESTS` | Max requests per window | `1000` |
 | `SOLANA_NETWORK` | Solana network | `devnet` |
 | `SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
 
@@ -925,7 +919,6 @@ curl "http://localhost:3001/api/fairscale/score?wallet=7xKXtg2CW87d97TXJSDpbD5jB
 **Error Responses**:
 - `400`: Missing or invalid wallet address
 - `401`: Invalid FairScale API key (backend misconfiguration)
-- `429`: Rate limit exceeded
 - `500`: Internal server error
 
 #### 3. Get FairScore Only
@@ -1554,12 +1547,11 @@ CORS_ORIGINS=https://your-frontend-domain.com
 
 #### 1. "Cannot read properties of undefined (reading 'wallet_age_days')"
 
-**Cause**: FairScore data not loaded or rate-limited
+**Cause**: FairScore data not loaded
 
 **Solution**: 
 - Check backend is running (`http://localhost:3001/api/health`)
 - Verify FairScale API key in `backend/.env`
-- Check browser console for 429 errors (rate limit)
 - Frontend should gracefully handle this with fallback
 
 #### 2. "Simulation failed: Attempt to debit an account"
@@ -1595,19 +1587,7 @@ solana program show YOUR_PROGRAM_ID --url devnet
 - Verify `VITE_API_BASE_URL=http://localhost:3001/api` in frontend `.env`
 - Check `fairscale.ts` uses `API_BASE_URL`, not direct FairScale URL
 
-#### 5. Backend Returns 429 (Too Many Requests)
-
-**Cause**: Rate limit exceeded (either FairScale API or backend limiter)
-
-**Solution**:
-- Increase backend rate limit in `backend/.env`:
-```env
-RATE_LIMIT_MAX_REQUESTS=5000
-```
-- Implement caching for FairScores (future improvement)
-- Use `useFairScore` hook instead of direct API calls
-
-#### 6. "Transaction timeout" or "Blockhash not found"
+#### 5. "Transaction timeout" or "Blockhash not found"
 
 **Cause**: Slow RPC or network congestion
 
@@ -1662,13 +1642,11 @@ msg!("Debug: current_round = {}", circle.current_round);
 
 1. **API Key Protection**: FairScale API key in `.env`, never exposed to frontend
 2. **CORS**: Strict origin checking
-3. **Rate Limiting**: Prevents abuse
-4. **Input Validation**: All inputs sanitized
+3. **Input Validation**: All inputs sanitized
 
 **Production Checklist**:
 - [ ] Use HTTPS for all endpoints
 - [ ] Implement authentication if needed
-- [ ] Monitor rate limits
 - [ ] Regular security audits
 
 ### Frontend Security

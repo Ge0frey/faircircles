@@ -5,7 +5,6 @@ Express.js backend server that handles FairScale API integration and circle stat
 ## Features
 
 - 🔐 **Secure API Key Management** - FairScale API keys stored in environment variables
-- 🚦 **Rate Limiting** - Protects against abuse
 - 🔒 **Security Headers** - Helmet.js for secure HTTP headers
 - 📝 **Request Logging** - Morgan for development and production logging
 - ❌ **Error Handling** - Centralized error handling with proper HTTP status codes
@@ -74,8 +73,6 @@ npm start
 | `SOLANA_RPC_URL` | Solana RPC endpoint | `https://api.devnet.solana.com` |
 | `PROGRAM_ID` | Deployed program ID | - |
 | `CORS_ORIGINS` | Comma-separated allowed origins | `http://localhost:5173` |
-| `RATE_LIMIT_WINDOW_MS` | Rate limit window in ms | `60000` |
-| `RATE_LIMIT_MAX_REQUESTS` | Max requests per window | `100` |
 
 ## Project Structure
 

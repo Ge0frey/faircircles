@@ -12,12 +12,9 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ): void {
-  // Don't spam logs with rate limit errors
-  if (err.statusCode !== 429) {
-    console.error(`[ERROR] ${err.message}`);
-    if (config.nodeEnv === 'development') {
-      console.error(err.stack);
-    }
+  console.error(`[ERROR] ${err.message}`);
+  if (config.nodeEnv === 'development') {
+    console.error(err.stack);
   }
 
   // Use statusCode from error if available
@@ -25,8 +22,7 @@ export function errorHandler(
 
   // Default error response
   const apiError: ApiError = {
-    error: statusCode === 429 ? 'Too Many Requests' : 
-           statusCode === 401 ? 'Unauthorized' :
+    error: statusCode === 401 ? 'Unauthorized' :
            statusCode === 404 ? 'Not Found' :
            'Internal Server Error',
     message: config.nodeEnv === 'development' 

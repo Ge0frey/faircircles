@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
 
 import { config, validateConfig } from './config/index.js';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
@@ -31,21 +30,6 @@ app.use(morgan(config.nodeEnv === 'development' ? 'dev' : 'combined'));
 // Body parsing
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: config.rateLimit.windowMs,
-  max: config.rateLimit.maxRequests,
-  message: {
-    error: 'Too Many Requests',
-    message: 'Rate limit exceeded. Please try again later.',
-    statusCode: 429,
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-
-app.use('/api', limiter);
 
 // Routes
 app.use('/api/health', healthRoutes);
