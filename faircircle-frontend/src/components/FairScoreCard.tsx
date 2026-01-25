@@ -1,18 +1,17 @@
 import { useFairScore } from '../hooks/useFairScore';
 import { TIER_COLORS, getTierFromScore } from '../types';
-import { getTierDescription, formatBadgeTier } from '../lib/fairscale';
+import { getTierDescription } from '../lib/fairscale';
 import { 
   Shield, 
   Sparkles, 
   TrendingUp, 
   Award,
   RefreshCw,
-  AlertCircle,
-  AlertTriangle
+  AlertCircle
 } from 'lucide-react';
 
 export function FairScoreCard() {
-  const { fairScore, loading, error, refetch, clearError } = useFairScore();
+  const { fairScore, loading, error, refetch } = useFairScore();
 
   // Show loading state only if we don't have cached data
   if (loading && !fairScore) {
@@ -82,19 +81,6 @@ export function FairScoreCard() {
         </button>
       </div>
 
-      {/* Warning banner for rate limit errors when we have cached data */}
-      {error && fairScore && (
-        <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 text-sm">
-          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-          <span>{error} (Showing cached score)</span>
-          <button
-            onClick={clearError}
-            className="ml-auto text-amber-400/70 hover:text-amber-400"
-          >
-            ✕
-          </button>
-        </div>
-      )}
 
       {/* Score Display */}
       <div className={`relative overflow-hidden rounded-xl p-6 ${colors.bg} ${colors.glow} shadow-lg`}>

@@ -41,19 +41,21 @@ export function useFairScore() {
       
       // Handle rate limit and network errors specially:
       // DO NOT reset the existing fairScore - preserve cached data
+      // Also don't show error in UI if we have cached data - use it silently
       if (error instanceof RateLimitError || error instanceof NetworkError) {
-        setFairScoreError(error.message);
         // Keep the existing fairScore - don't call setFairScore(null)
+        // Don't set error if we have cached data - silently use cache
+        if (!fairScore) {
+          setFairScoreError(error.message);
+        }
       } else {
         // For other errors, set error but still preserve cached data if available
         setFairScoreError(error instanceof Error ? error.message : 'Failed to fetch FairScore');
-        // Only clear score if we don't have any cached data
-        // This preserves the last known good score
       }
     } finally {
       setFairScoreLoading(false);
     }
-  }, [publicKey, setFairScore, setFairScoreLoading, setFairScoreError, clearFairScoreError]);
+  }, [publicKey, fairScore, setFairScore, setFairScoreLoading, setFairScoreError, clearFairScoreError]);
 
   /**
    * Load FairScore with cache awareness
@@ -92,9 +94,13 @@ export function useFairScore() {
       
       // Handle rate limit and network errors specially:
       // DO NOT reset the existing fairScore - preserve cached data
+      // Also don't show error in UI if we have cached data - use it silently
       if (error instanceof RateLimitError || error instanceof NetworkError) {
-        setFairScoreError(error.message);
         // Keep the existing fairScore - don't call setFairScore(null)
+        // Don't set error if we have cached data - silently use cache
+        if (!fairScore) {
+          setFairScoreError(error.message);
+        }
         // Mark as fetched to prevent retry loops
         hasFetchedRef.current = walletAddress;
       } else {
