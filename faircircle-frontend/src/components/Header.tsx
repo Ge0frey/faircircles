@@ -1,45 +1,51 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useFairScore } from '../hooks/useFairScore';
+import { useStore } from '../store/useStore';
 import { TIER_COLORS, getTierFromScore } from '../types';
-import { CircleDot, Shield } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 export function Header() {
-  const { connected, publicKey } = useWallet();
+  const { connected, publicKey, disconnect } = useWallet();
   const { fairScore } = useFairScore();
+  const { setActiveTab } = useStore();
 
   const tier = fairScore ? (fairScore.tier || getTierFromScore(fairScore.fair_score)) : 'unrated';
   const colors = TIER_COLORS[tier];
 
+  const handleLogoClick = () => {
+    if (connected) {
+      disconnect();
+    }
+  };
+
   return (
-    <header className="sticky top-0 z-50 bg-zinc-950/80 backdrop-blur-xl border-b border-zinc-800/50">
+    <header className="sticky top-0 z-50 bg-zinc-950/90 backdrop-blur-md border-b border-zinc-800/50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-500">
-              <CircleDot className="w-6 h-6 text-white" />
-            </div>
-            <div>
-              <h1 className="text-xl font-bold text-white tracking-tight">
-                Fair<span className="text-emerald-400">Circles</span>
-              </h1>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-wider -mt-0.5">
-                Reputation-Based ROSCAs
-              </p>
-            </div>
-          </div>
+        <div className="flex items-center justify-between h-[72px]">
+          {/* Logo - Clean text-based design */}
+          <button 
+            onClick={handleLogoClick}
+            className="flex items-center gap-1 group cursor-pointer"
+          >
+            <span className="text-2xl font-bold tracking-tight text-white">
+              Fair
+            </span>
+            <span className="text-2xl font-bold tracking-tight text-emerald-500">
+              Circles
+            </span>
+          </button>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* FairScore Badge */}
             {connected && fairScore && (
-              <div className={`hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full ${colors.bg} ${colors.text}`}>
-                <Shield className="w-4 h-4" />
+              <div className={`hidden sm:flex items-center gap-2.5 px-4 py-2 rounded-lg bg-zinc-900 border border-zinc-800 ${colors.text}`}>
+                <Shield className="w-4 h-4 opacity-80" />
                 <span className="text-sm font-semibold">
                   {Math.round(fairScore.fair_score)}
                 </span>
-                <span className="text-xs opacity-75 uppercase">
+                <span className="text-xs font-medium uppercase tracking-wide opacity-70">
                   {tier}
                 </span>
               </div>
@@ -48,11 +54,12 @@ export function Header() {
             {/* Wallet Button */}
             <WalletMultiButton 
               style={{
-                backgroundColor: 'rgb(39 39 42)',
-                height: '40px',
-                borderRadius: '12px',
+                background: 'rgb(39, 39, 42)',
+                height: '44px',
+                borderRadius: '8px',
                 fontSize: '14px',
                 fontWeight: '500',
+                border: '1px solid rgb(63, 63, 70)',
               }}
             />
           </div>

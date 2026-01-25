@@ -15,7 +15,9 @@ import {
   UserPlus,
   CheckCircle,
   Lock,
-  X
+  X,
+  Zap,
+  TrendingUp
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -42,9 +44,9 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
   const canStart = isCreator && circle.status === 'Forming' && circle.memberCount >= 3;
 
   const formatPeriod = (seconds: number) => {
-    if (seconds < 86400) return `${Math.round(seconds / 3600)} hours`;
-    if (seconds < 604800) return `${Math.round(seconds / 86400)} days`;
-    return `${Math.round(seconds / 604800)} weeks`;
+    if (seconds < 86400) return `${Math.round(seconds / 3600)}h`;
+    if (seconds < 604800) return `${Math.round(seconds / 86400)}d`;
+    return `${Math.round(seconds / 604800)}w`;
   };
 
   const handleJoin = async (e: React.MouseEvent) => {
@@ -69,12 +71,35 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
     }
   };
 
-  const statusColors = {
-    Forming: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    Active: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    Completed: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    Cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
+  const statusConfig = {
+    Forming: { 
+      bg: 'bg-blue-500/10', 
+      text: 'text-blue-400', 
+      border: 'border-blue-500/20',
+      icon: Users
+    },
+    Active: { 
+      bg: 'bg-emerald-500/10', 
+      text: 'text-emerald-400', 
+      border: 'border-emerald-500/20',
+      icon: TrendingUp
+    },
+    Completed: { 
+      bg: 'bg-purple-500/10', 
+      text: 'text-purple-400', 
+      border: 'border-purple-500/20',
+      icon: CheckCircle
+    },
+    Cancelled: { 
+      bg: 'bg-red-500/10', 
+      text: 'text-red-400', 
+      border: 'border-red-500/20',
+      icon: X
+    },
   };
+
+  const status = statusConfig[circle.status];
+  const StatusIcon = status.icon;
 
   const handleDismiss = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -84,104 +109,109 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
   return (
     <div
       onClick={onSelect}
-      className="group relative bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-black/20"
+      className="group relative glass-card rounded-2xl p-6 hover-lift hover-glow transition-all duration-300 cursor-pointer"
     >
-      {/* Status Badge and Dismiss Button */}
-      <div className="absolute top-4 right-4 flex items-center gap-2">
-        {showDismiss && circle.status === 'Completed' && (
-          <button
-            onClick={handleDismiss}
-            className="p-1.5 rounded-full bg-zinc-800 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-colors"
-            title="Remove from list"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        )}
-        <span className={`px-3 py-1 rounded-full text-xs font-medium border ${statusColors[circle.status]}`}>
-          {circle.status}
-        </span>
-      </div>
-
-      {/* Circle Name & Tier */}
-      <div className="mb-4">
-        <h3 className="text-xl font-bold text-white mb-2 group-hover:text-emerald-400 transition-colors">
-          {circle.name}
-        </h3>
-        <div className="flex items-center gap-2">
-          <div className={`px-2 py-0.5 rounded text-xs font-medium ${colors.bg} ${colors.text}`}>
-            {getTierRequirementText(circle.minFairScore)}
+      {/* Top Section */}
+      <div className="flex items-start justify-between mb-5">
+        {/* Circle Name & Tier */}
+        <div className="flex-1 min-w-0 pr-4">
+          <h3 className="text-lg font-bold text-white mb-2 truncate group-hover:text-emerald-400 transition-colors">
+            {circle.name}
+          </h3>
+          <div className="flex items-center gap-2 flex-wrap">
+            <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${colors.bg} ${colors.text}`}>
+              <Shield className="w-3 h-3" />
+              {getTierRequirementText(circle.minFairScore)}
+            </div>
+            {isMember && (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-500/10 text-emerald-400">
+                <CheckCircle className="w-3 h-3" />
+                Member
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Status Badge and Dismiss */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {showDismiss && circle.status === 'Completed' && (
+            <button
+              onClick={handleDismiss}
+              className="p-1.5 rounded-lg bg-zinc-800/50 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-colors"
+              title="Remove from list"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          )}
+          <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold ${status.bg} ${status.text} border ${status.border}`}>
+            <StatusIcon className="w-3.5 h-3.5" />
+            {circle.status}
+          </span>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-zinc-800">
-            <Users className="w-4 h-4 text-zinc-400" />
+      {/* Stats Grid - Compact */}
+      <div className="grid grid-cols-4 gap-3 mb-5">
+        <div className="p-3 rounded-xl bg-zinc-800/40 group-hover:bg-zinc-800/60 transition-colors">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs mb-1.5">
+            <Users className="w-3.5 h-3.5" />
+            <span>Members</span>
           </div>
-          <div>
-            <div className="text-sm text-zinc-500">Members</div>
-            <div className="text-white font-semibold">{circle.memberCount} / 10</div>
-          </div>
+          <div className="text-white font-bold text-sm">{circle.memberCount}/10</div>
         </div>
         
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-zinc-800">
-            <Coins className="w-4 h-4 text-zinc-400" />
+        <div className="p-3 rounded-xl bg-zinc-800/40 group-hover:bg-zinc-800/60 transition-colors">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs mb-1.5">
+            <Coins className="w-3.5 h-3.5" />
+            <span>Amount</span>
           </div>
-          <div>
-            <div className="text-sm text-zinc-500">Contribution</div>
-            <div className="text-white font-semibold">{lamportsToSOL(circle.contributionAmount)} SOL</div>
-          </div>
+          <div className="text-white font-bold text-sm">{lamportsToSOL(circle.contributionAmount)} SOL</div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-zinc-800">
-            <Clock className="w-4 h-4 text-zinc-400" />
+        <div className="p-3 rounded-xl bg-zinc-800/40 group-hover:bg-zinc-800/60 transition-colors">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs mb-1.5">
+            <Clock className="w-3.5 h-3.5" />
+            <span>Period</span>
           </div>
-          <div>
-            <div className="text-sm text-zinc-500">Period</div>
-            <div className="text-white font-semibold">{formatPeriod(circle.periodLength)}</div>
-          </div>
+          <div className="text-white font-bold text-sm">{formatPeriod(circle.periodLength)}</div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-zinc-800">
-            <Shield className="w-4 h-4 text-zinc-400" />
+        <div className="p-3 rounded-xl bg-zinc-800/40 group-hover:bg-zinc-800/60 transition-colors">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs mb-1.5">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Pool</span>
           </div>
-          <div>
-            <div className="text-sm text-zinc-500">Pool</div>
-            <div className="text-white font-semibold">{lamportsToSOL(circle.totalPool)} SOL</div>
-          </div>
+          <div className="text-white font-bold text-sm">{lamportsToSOL(circle.totalPool)} SOL</div>
         </div>
       </div>
 
       {/* Progress Bar (for active circles) */}
       {circle.status === 'Active' && (
-        <div className="mb-6">
-          <div className="flex justify-between text-sm mb-2">
-            <span className="text-zinc-500">Round Progress</span>
-            <span className="text-white font-medium">
-              Round {circle.currentRound} of {circle.memberCount}
+        <div className="mb-5">
+          <div className="flex justify-between items-center text-xs mb-2">
+            <span className="text-zinc-500 font-medium">Round Progress</span>
+            <span className="text-emerald-400 font-semibold">
+              {circle.currentRound} / {circle.memberCount}
             </span>
           </div>
           <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full transition-all duration-500"
+              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 relative"
               style={{ width: `${(circle.currentRound / circle.memberCount) * 100}%` }}
-            />
+            >
+              <div className="absolute inset-0 animate-shimmer" />
+            </div>
           </div>
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Section */}
       <div className="flex items-center gap-3">
         {canJoin && (
           <button
             onClick={handleJoin}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+            className="flex-1 btn-primary flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-white font-semibold transition-all disabled:opacity-50 disabled:transform-none"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -198,7 +228,7 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
           <button
             onClick={handleStart}
             disabled={loading}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-medium rounded-xl transition-colors disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -211,23 +241,16 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
           </button>
         )}
 
-        {isMember && (
-          <div className="flex items-center gap-2 text-emerald-400">
-            <CheckCircle className="w-4 h-4" />
-            <span className="text-sm font-medium">Member</span>
-          </div>
-        )}
-
         {!canJoin && !isMember && circle.status === 'Forming' && (
-          <div className="flex items-center gap-2 text-zinc-500">
+          <div className="flex items-center gap-2 text-zinc-500 bg-zinc-800/50 px-4 py-2.5 rounded-xl">
             <Lock className="w-4 h-4" />
-            <span className="text-sm">Requires {getTierRequirementText(circle.minFairScore)}</span>
+            <span className="text-sm font-medium">Requires {getTierRequirementText(circle.minFairScore)}</span>
           </div>
         )}
 
         <button
           onClick={onSelect}
-          className="p-2.5 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors ml-auto"
+          className="p-3 rounded-xl bg-zinc-800/50 hover:bg-emerald-500/20 text-zinc-400 hover:text-emerald-400 transition-all ml-auto group-hover:translate-x-1"
         >
           <ChevronRight className="w-5 h-5" />
         </button>

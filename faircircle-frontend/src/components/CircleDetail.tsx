@@ -17,7 +17,11 @@ import {
   CheckCircle2,
   Circle as CircleIcon,
   AlertTriangle,
-  Zap
+  Zap,
+  TrendingUp,
+  Sparkles,
+  Info,
+  RefreshCw
 } from 'lucide-react';
 
 interface Props {
@@ -103,12 +107,35 @@ export function CircleDetail({ circle, onBack }: Props) {
     return `${Math.round(seconds / 604800)} weeks`;
   };
 
-  const statusColors = {
-    Forming: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-    Active: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30',
-    Completed: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
-    Cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
+  const statusConfig = {
+    Forming: { 
+      bg: 'bg-blue-500/10', 
+      text: 'text-blue-400', 
+      border: 'border-blue-500/20',
+      icon: Users
+    },
+    Active: { 
+      bg: 'bg-emerald-500/10', 
+      text: 'text-emerald-400', 
+      border: 'border-emerald-500/20',
+      icon: TrendingUp
+    },
+    Completed: { 
+      bg: 'bg-purple-500/10', 
+      text: 'text-purple-400', 
+      border: 'border-purple-500/20',
+      icon: CheckCircle2
+    },
+    Cancelled: { 
+      bg: 'bg-red-500/10', 
+      text: 'text-red-400', 
+      border: 'border-red-500/20',
+      icon: AlertTriangle
+    },
   };
+
+  const status = statusConfig[circleData.status];
+  const StatusIcon = status.icon;
 
   // Use getTierFromScore100 since minFairScore is on 0-100 scale
   const tier = getTierFromScore100(circleData.minFairScore);
@@ -121,105 +148,138 @@ export function CircleDetail({ circle, onBack }: Props) {
     return aOrder - bOrder;
   });
 
+  const contributedCount = circleData.members.filter((_, i) => circleData.members[i]?.hasContributed).length;
+
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <button
-          onClick={onBack}
-          className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5" />
-        </button>
-        <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">{circleData.name}</h1>
-          <p className="text-zinc-500">Created by {circleData.creator.toBase58().slice(0, 8)}...</p>
+    <div className="space-y-8 animate-fade-in-up">
+      {/* Header - Enhanced */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-start gap-4">
+          <button
+            onClick={onBack}
+            className="p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all hover-lift"
+          >
+            <ArrowLeft className="w-5 h-5" />
+          </button>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-3 flex-wrap mb-2">
+              <h1 className="text-2xl font-bold text-white">{circleData.name}</h1>
+              <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-semibold ${status.bg} ${status.text} border ${status.border}`}>
+                <StatusIcon className="w-4 h-4" />
+                {circleData.status}
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-sm text-zinc-500">
+              <span>Created by {circleData.creator.toBase58().slice(0, 8)}...{circleData.creator.toBase58().slice(-4)}</span>
+              <span className={`px-2.5 py-1 rounded-lg text-xs font-semibold ${tierColors.bg} ${tierColors.text}`}>
+                {circleData.minFairScore}+ FairScore
+              </span>
+            </div>
+          </div>
+          <button
+            onClick={refreshCircle}
+            className="p-3 rounded-xl bg-zinc-800/50 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-all"
+            title="Refresh circle data"
+          >
+            <RefreshCw className="w-5 h-5" />
+          </button>
         </div>
-        <span className={`px-3 py-1.5 rounded-full text-sm font-medium border ${statusColors[circleData.status]}`}>
-          {circleData.status}
-        </span>
       </div>
 
-      {/* Quick Stats */}
+      {/* Quick Stats - Enhanced Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-zinc-900/80 backdrop-blur-xl rounded-xl p-4 border border-zinc-800">
-          <div className="flex items-center gap-2 text-zinc-500 text-sm mb-2">
+        <div className="glass-card rounded-xl p-5 hover-lift transition-all">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium uppercase tracking-wide mb-3">
             <Users className="w-4 h-4" />
             Members
           </div>
-          <div className="text-2xl font-bold text-white">{circleData.memberCount}/10</div>
+          <div className="text-3xl font-bold text-white">{circleData.memberCount}<span className="text-lg text-zinc-500">/10</span></div>
         </div>
         
-        <div className="bg-zinc-900/80 backdrop-blur-xl rounded-xl p-4 border border-zinc-800">
-          <div className="flex items-center gap-2 text-zinc-500 text-sm mb-2">
+        <div className="glass-card rounded-xl p-5 hover-lift transition-all">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium uppercase tracking-wide mb-3">
             <Coins className="w-4 h-4" />
             Contribution
           </div>
-          <div className="text-2xl font-bold text-white">{lamportsToSOL(circleData.contributionAmount)} SOL</div>
+          <div className="text-3xl font-bold text-white">{lamportsToSOL(circleData.contributionAmount)} <span className="text-lg text-emerald-400">SOL</span></div>
         </div>
         
-        <div className="bg-zinc-900/80 backdrop-blur-xl rounded-xl p-4 border border-zinc-800">
-          <div className="flex items-center gap-2 text-zinc-500 text-sm mb-2">
+        <div className="glass-card rounded-xl p-5 hover-lift transition-all">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium uppercase tracking-wide mb-3">
             <Clock className="w-4 h-4" />
             Period
           </div>
-          <div className="text-2xl font-bold text-white">{formatPeriod(circleData.periodLength)}</div>
+          <div className="text-3xl font-bold text-white">{formatPeriod(circleData.periodLength)}</div>
         </div>
         
-        <div className="bg-zinc-900/80 backdrop-blur-xl rounded-xl p-4 border border-zinc-800">
-          <div className="flex items-center gap-2 text-zinc-500 text-sm mb-2">
-            <Shield className="w-4 h-4" />
-            Min Score
+        <div className="glass-card rounded-xl p-5 hover-lift transition-all">
+          <div className="flex items-center gap-2 text-zinc-500 text-xs font-medium uppercase tracking-wide mb-3">
+            <Zap className="w-4 h-4" />
+            Total Pool
           </div>
-          <div className={`text-2xl font-bold ${tierColors.text.replace('text-', 'text-')}`}>
-            {circleData.minFairScore}+
-          </div>
+          <div className="text-3xl font-bold text-gradient">{lamportsToSOL(circleData.totalPool)} SOL</div>
         </div>
       </div>
 
-      {/* Current Round Info (for active circles) */}
+      {/* Current Round Info (for active circles) - Enhanced */}
       {circleData.status === 'Active' && (
-        <div className="bg-gradient-to-r from-emerald-600/20 to-teal-600/20 rounded-2xl p-6 border border-emerald-500/30">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-              <Zap className="w-5 h-5 text-emerald-400" />
-              Round {currentRound} of {circleData.memberCount}
-            </h3>
-            <div className="text-emerald-400 font-medium">
-              Pool: {lamportsToSOL(circleData.contributionAmount * circleData.memberCount)} SOL
+        <div className="glass-card rounded-2xl p-6 border border-emerald-500/20 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-teal-500/5 pointer-events-none" />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10">
+                  <Zap className="w-6 h-6 text-emerald-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold text-white">Round {currentRound} of {circleData.memberCount}</h3>
+                  <p className="text-sm text-zinc-500">Contributions in progress</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold text-emerald-400">{lamportsToSOL(circleData.contributionAmount * circleData.memberCount)} SOL</div>
+                <div className="text-xs text-zinc-500">Round Pool</div>
+              </div>
             </div>
-          </div>
 
-          {/* Progress */}
-          <div className="h-3 bg-zinc-800 rounded-full overflow-hidden mb-4">
-            <div 
-              className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500"
-              style={{ 
-                width: `${(circleData.members.filter((_, i) => circleData.members[i]?.hasContributed).length / circleData.memberCount) * 100}%` 
-              }}
-            />
-          </div>
+            {/* Progress */}
+            <div className="mb-4">
+              <div className="flex justify-between items-center text-sm mb-2">
+                <span className="text-zinc-400">
+                  <span className="font-semibold text-emerald-400">{contributedCount}</span> of {circleData.memberCount} contributed
+                </span>
+                <span className="text-zinc-500 font-medium">
+                  {Math.round((contributedCount / circleData.memberCount) * 100)}%
+                </span>
+              </div>
+              <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+                <div 
+                  className="h-full bg-gradient-to-r from-emerald-500 to-teal-400 rounded-full transition-all duration-500 relative"
+                  style={{ width: `${(contributedCount / circleData.memberCount) * 100}%` }}
+                >
+                  <div className="absolute inset-0 animate-shimmer" />
+                </div>
+              </div>
+            </div>
 
-          <div className="flex justify-between text-sm">
-            <span className="text-zinc-400">
-              {circleData.members.filter((_, i) => circleData.members[i]?.hasContributed).length} of {circleData.memberCount} contributed
-            </span>
             {currentPayoutIdx >= 0 && (
-              <span className="text-emerald-400">
-                Payout to: {circleData.members[currentPayoutIdx]?.address.toBase58().slice(0, 8)}...
-              </span>
+              <div className="flex items-center gap-2 text-sm bg-emerald-500/10 px-4 py-3 rounded-xl">
+                <Trophy className="w-4 h-4 text-amber-400" />
+                <span className="text-zinc-400">Next payout to:</span>
+                <span className="font-semibold text-white">{circleData.members[currentPayoutIdx]?.address.toBase58().slice(0, 8)}...{circleData.members[currentPayoutIdx]?.address.toBase58().slice(-4)}</span>
+              </div>
             )}
           </div>
         </div>
       )}
 
-      {/* Action Buttons */}
+      {/* Action Buttons - Enhanced */}
       <div className="flex flex-wrap gap-4">
         {canJoin && (
           <button
             onClick={handleJoin}
             disabled={loading}
-            className="flex-1 min-w-[200px] flex items-center justify-center gap-2 px-6 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+            className="flex-1 min-w-[200px] btn-primary flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-white font-semibold transition-all disabled:opacity-50"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -236,7 +296,7 @@ export function CircleDetail({ circle, onBack }: Props) {
           <button
             onClick={handleStart}
             disabled={loading}
-            className="flex-1 min-w-[200px] flex items-center justify-center gap-2 px-6 py-4 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-colors disabled:opacity-50"
+            className="flex-1 min-w-[200px] flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-blue-500/20 hover-lift"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -253,7 +313,7 @@ export function CircleDetail({ circle, onBack }: Props) {
           <button
             onClick={handleContribute}
             disabled={loading}
-            className="flex-1 min-w-[200px] flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-emerald-500/25"
+            className="flex-1 min-w-[200px] btn-primary flex items-center justify-center gap-3 px-8 py-4 rounded-xl text-white font-semibold transition-all disabled:opacity-50 animate-glow-pulse"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -270,120 +330,129 @@ export function CircleDetail({ circle, onBack }: Props) {
           <button
             onClick={handleClaim}
             disabled={loading}
-            className="flex-1 min-w-[200px] flex items-center justify-center gap-2 px-6 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-amber-500/25 animate-pulse"
+            className="flex-1 min-w-[200px] flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold rounded-xl transition-all disabled:opacity-50 shadow-lg shadow-amber-500/25 animate-glow-pulse hover-lift"
           >
             {loading ? (
               <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
                 <Trophy className="w-5 h-5" />
-                Claim Payout ({lamportsToSOL(circleData.contributionAmount * circleData.memberCount)} SOL)
+                Claim {lamportsToSOL(circleData.contributionAmount * circleData.memberCount)} SOL
               </>
             )}
           </button>
         )}
 
         {hasContributed && !isPayoutRecipient && circleData.status === 'Active' && (
-          <div className="flex items-center gap-2 px-6 py-4 bg-zinc-800 rounded-xl text-emerald-400">
+          <div className="flex items-center gap-3 px-6 py-4 glass-card rounded-xl text-emerald-400">
             <CheckCircle2 className="w-5 h-5" />
-            <span className="font-medium">Contributed this round</span>
+            <span className="font-semibold">Contributed this round</span>
           </div>
         )}
       </div>
 
-      {/* Members List */}
-      <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl border border-zinc-800 overflow-hidden">
+      {/* Members List - Enhanced */}
+      <div className="glass-card rounded-2xl overflow-hidden">
         <button
           onClick={() => setShowMembers(!showMembers)}
-          className="w-full flex items-center justify-between p-6 hover:bg-zinc-800/50 transition-colors"
+          className="w-full flex items-center justify-between p-6 hover:bg-zinc-800/30 transition-colors"
         >
-          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-emerald-400" />
-            Members & Payout Order
-          </h3>
-          {showMembers ? (
-            <ChevronUp className="w-5 h-5 text-zinc-500" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-zinc-500" />
-          )}
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-500/10">
+              <Users className="w-5 h-5 text-emerald-400" />
+            </div>
+            <div className="text-left">
+              <h3 className="text-lg font-bold text-white">Members & Payout Order</h3>
+              <p className="text-sm text-zinc-500">{circleData.memberCount} members in this circle</p>
+            </div>
+          </div>
+          <div className={`p-2 rounded-lg transition-colors ${showMembers ? 'bg-zinc-700' : 'bg-zinc-800'}`}>
+            {showMembers ? (
+              <ChevronUp className="w-5 h-5 text-zinc-400" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-zinc-400" />
+            )}
+          </div>
         </button>
 
         {showMembers && (
-          <div className="border-t border-zinc-800">
+          <div className="border-t border-zinc-800/50">
             {circleData.members.map((member, idx) => {
               const payoutPosition = circleData.payoutOrder.indexOf(idx) + 1;
               const isCurrentRecipient = circleData.status === 'Active' && currentPayoutIdx === idx;
               const hasReceivedPayout = member.hasClaimed;
               const memberTier = getTierFromScore(member.fairScore);
               const memberColors = TIER_COLORS[memberTier];
+              const isYou = publicKey?.equals(member.address);
 
               return (
                 <div
                   key={member.address.toBase58()}
-                  className={`flex items-center gap-4 p-4 border-b border-zinc-800/50 last:border-b-0 ${
-                    isCurrentRecipient ? 'bg-emerald-500/10' : ''
-                  } ${publicKey?.equals(member.address) ? 'bg-zinc-800/30' : ''}`}
+                  className={`flex items-center gap-4 p-5 border-b border-zinc-800/30 last:border-b-0 transition-colors ${
+                    isCurrentRecipient ? 'bg-amber-500/5' : ''
+                  } ${isYou ? 'bg-emerald-500/5' : 'hover:bg-zinc-800/20'}`}
                 >
-                  {/* Position */}
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center text-lg font-bold ${
+                  {/* Position Badge */}
+                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg font-bold transition-all ${
                     hasReceivedPayout 
-                      ? 'bg-emerald-500/20 text-emerald-400'
+                      ? 'bg-emerald-500/20 text-emerald-400 ring-2 ring-emerald-500/30'
                       : isCurrentRecipient
-                        ? 'bg-amber-500/20 text-amber-400'
-                        : 'bg-zinc-800 text-zinc-500'
+                        ? 'bg-amber-500/20 text-amber-400 ring-2 ring-amber-500/30 animate-pulse'
+                        : 'bg-zinc-800/50 text-zinc-500'
                   }`}>
-                    {payoutPosition}
+                    #{payoutPosition}
                   </div>
 
                   {/* Member Info */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <span className="text-white font-medium truncate">
+                    <div className="flex items-center gap-2 flex-wrap mb-1">
+                      <span className="text-white font-semibold">
                         {member.address.toBase58().slice(0, 8)}...{member.address.toBase58().slice(-4)}
                       </span>
-                      {publicKey?.equals(member.address) && (
-                        <span className="px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded-full">
+                      {isYou && (
+                        <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs font-semibold rounded-full">
                           You
                         </span>
                       )}
                       {idx === 0 && (
-                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-400 text-xs rounded-full">
+                        <span className="px-2.5 py-0.5 bg-blue-500/20 text-blue-400 text-xs font-semibold rounded-full">
                           Creator
                         </span>
                       )}
                     </div>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className={`px-2 py-0.5 rounded text-xs font-medium ${memberColors.bg} ${memberColors.text}`}>
+                    <div className="flex items-center gap-2">
+                      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${memberColors.bg} ${memberColors.text}`}>
+                        <Shield className="w-3 h-3" />
                         {memberTier} • {member.fairScore}
                       </span>
                     </div>
                   </div>
 
-                  {/* Status */}
-                  <div className="flex items-center gap-2">
+                  {/* Status Indicators */}
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     {circleData.status === 'Active' && currentRound > 0 && (
                       member.hasContributed ? (
-                        <div className="flex items-center gap-1 text-emerald-400 text-sm">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-sm font-medium">
                           <CheckCircle2 className="w-4 h-4" />
-                          <span>Contributed</span>
+                          <span className="hidden sm:inline">Contributed</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1 text-zinc-500 text-sm">
+                        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-zinc-800/50 text-zinc-500 text-sm font-medium">
                           <CircleIcon className="w-4 h-4" />
-                          <span>Pending</span>
+                          <span className="hidden sm:inline">Pending</span>
                         </div>
                       )
                     )}
                     {hasReceivedPayout && (
-                      <div className="flex items-center gap-1 text-emerald-400 text-sm">
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 text-sm font-medium">
                         <Trophy className="w-4 h-4" />
-                        <span>Received</span>
+                        <span className="hidden sm:inline">Received</span>
                       </div>
                     )}
                     {isCurrentRecipient && !hasReceivedPayout && (
-                      <div className="flex items-center gap-1 text-amber-400 text-sm animate-pulse">
-                        <AlertTriangle className="w-4 h-4" />
-                        <span>Next Payout</span>
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 text-sm font-medium animate-pulse">
+                        <Sparkles className="w-4 h-4" />
+                        <span className="hidden sm:inline">Next</span>
                       </div>
                     )}
                   </div>
@@ -394,25 +463,42 @@ export function CircleDetail({ circle, onBack }: Props) {
         )}
       </div>
 
-      {/* How Payout Order Works */}
-      <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800">
-        <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-          <Shield className="w-5 h-5 text-emerald-400" />
-          How Payout Order Works
-        </h3>
-        <div className="space-y-3 text-sm text-zinc-400">
-          <p>
-            <strong className="text-white">FairScore determines payout order:</strong> Members with higher FairScores 
-            receive payouts earlier in the rotation.
-          </p>
-          <p>
-            <strong className="text-white">Why this matters:</strong> Lower-reputation members prove their commitment 
-            by contributing first while waiting for their turn, reducing default risk for the group.
-          </p>
-          <p>
-            <strong className="text-white">Higher trust = earlier access:</strong> Building on-chain reputation 
-            with FairScale rewards you with priority access to pooled funds.
-          </p>
+      {/* How Payout Order Works - Enhanced */}
+      <div className="glass-card rounded-2xl p-6">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="p-2 rounded-lg bg-emerald-500/10">
+            <Info className="w-5 h-5 text-emerald-400" />
+          </div>
+          <h3 className="text-lg font-bold text-white">How Payout Order Works</h3>
+        </div>
+        <div className="space-y-4 text-sm">
+          <div className="flex gap-4 items-start p-4 rounded-xl bg-zinc-800/30">
+            <div className="p-2 rounded-lg bg-emerald-500/10 flex-shrink-0">
+              <TrendingUp className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold mb-1">FairScore Determines Order</p>
+              <p className="text-zinc-400">Members with higher FairScores receive payouts earlier in the rotation.</p>
+            </div>
+          </div>
+          <div className="flex gap-4 items-start p-4 rounded-xl bg-zinc-800/30">
+            <div className="p-2 rounded-lg bg-blue-500/10 flex-shrink-0">
+              <Shield className="w-4 h-4 text-blue-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold mb-1">Risk Mitigation</p>
+              <p className="text-zinc-400">Lower-reputation members prove commitment by contributing first while waiting for their turn.</p>
+            </div>
+          </div>
+          <div className="flex gap-4 items-start p-4 rounded-xl bg-zinc-800/30">
+            <div className="p-2 rounded-lg bg-amber-500/10 flex-shrink-0">
+              <Trophy className="w-4 h-4 text-amber-400" />
+            </div>
+            <div>
+              <p className="text-white font-semibold mb-1">Reward Trust</p>
+              <p className="text-zinc-400">Building on-chain reputation with FairScale rewards you with priority access to pooled funds.</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>

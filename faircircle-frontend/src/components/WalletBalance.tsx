@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useWallet, useConnection } from '@solana/wallet-adapter-react';
 import { LAMPORTS_PER_SOL } from '@solana/web3.js';
-import { AlertTriangle, RefreshCw, DollarSign } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Wallet, ExternalLink, Coins } from 'lucide-react';
 
 export function WalletBalance() {
   const { publicKey } = useWallet();
@@ -32,10 +32,10 @@ export function WalletBalance() {
       const signature = await connection.requestAirdrop(publicKey, 2 * LAMPORTS_PER_SOL);
       await connection.confirmTransaction(signature, 'confirmed');
       await fetchBalance();
-      alert('✅ Airdrop successful! You received 2 SOL.');
+      alert('Airdrop successful! You received 2 SOL.');
     } catch (error) {
       console.error('Airdrop failed:', error);
-      alert('❌ Airdrop failed. The devnet faucet may be rate limited. Please visit https://faucet.solana.com');
+      alert('Airdrop failed. The devnet faucet may be rate limited. Please visit https://faucet.solana.com');
     } finally {
       setAirdropping(false);
     }
@@ -52,69 +52,80 @@ export function WalletBalance() {
   const needsAirdrop = balance !== null && balance < 0.5;
 
   return (
-    <div className={`rounded-xl p-4 border ${
-      needsAirdrop 
-        ? 'bg-amber-500/10 border-amber-500/30' 
-        : 'bg-zinc-800/50 border-zinc-700'
+    <div className={`glass-card rounded-2xl p-5 ${
+      needsAirdrop ? 'border border-amber-500/30' : ''
     }`}>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className={`p-2 rounded-lg ${
-            needsAirdrop ? 'bg-amber-500/20' : 'bg-emerald-500/20'
+          <div className={`p-2.5 rounded-xl ${
+            needsAirdrop ? 'bg-amber-500/10' : 'bg-emerald-500/10'
           }`}>
             {needsAirdrop ? (
               <AlertTriangle className="w-5 h-5 text-amber-400" />
             ) : (
-              <DollarSign className="w-5 h-5 text-emerald-400" />
+              <Wallet className="w-5 h-5 text-emerald-400" />
             )}
           </div>
           <div>
-            <div className="text-sm text-zinc-400">Devnet Balance</div>
-            <div className="text-xl font-bold text-white">
+            <div className="text-xs text-zinc-500 font-medium uppercase tracking-wide">Devnet Balance</div>
+            <div className="text-2xl font-bold text-white mt-0.5">
               {loading ? (
-                <span className="text-zinc-500">Loading...</span>
+                <span className="text-zinc-500 text-lg">Loading...</span>
               ) : (
-                `${balance?.toFixed(4) || '0.0000'} SOL`
+                <>
+                  {balance?.toFixed(4) || '0.0000'} 
+                  <span className="text-emerald-400 text-lg ml-1">SOL</span>
+                </>
               )}
             </div>
           </div>
         </div>
         
-        <div className="flex gap-2">
-          <button
-            onClick={fetchBalance}
-            disabled={loading}
-            className="p-2 rounded-lg hover:bg-zinc-700 transition-colors text-zinc-400 hover:text-white disabled:opacity-50"
-            title="Refresh balance"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          </button>
-          
-          {needsAirdrop && (
-            <button
-              onClick={requestAirdrop}
-              disabled={airdropping}
-              className="px-4 py-2 rounded-lg bg-amber-500 hover:bg-amber-600 text-white font-medium transition-colors disabled:opacity-50 text-sm"
-            >
-              {airdropping ? 'Requesting...' : 'Request 2 SOL'}
-            </button>
-          )}
-        </div>
+        <button
+          onClick={fetchBalance}
+          disabled={loading}
+          className="p-2.5 rounded-xl bg-zinc-800/50 hover:bg-zinc-700 transition-colors text-zinc-500 hover:text-white disabled:opacity-50"
+          title="Refresh balance"
+        >
+          <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+        </button>
       </div>
       
       {needsAirdrop && (
-        <div className="mt-3 text-sm text-amber-300">
-          ⚠️ You need at least 0.5 SOL to create circles (for account rent and fees).
-          {' '}
-          <a 
-            href="https://faucet.solana.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="underline hover:text-amber-200"
+        <div className="space-y-3">
+          <button
+            onClick={requestAirdrop}
+            disabled={airdropping}
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 text-white font-semibold transition-all disabled:opacity-50 shadow-lg shadow-amber-500/20"
           >
-            Visit the Solana Faucet
-          </a>
-          {' '}if the airdrop button doesn't work.
+            {airdropping ? (
+              <>
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Requesting...
+              </>
+            ) : (
+              <>
+                <Coins className="w-4 h-4" />
+                Request 2 SOL Airdrop
+              </>
+            )}
+          </button>
+          <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
+            <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-amber-300/80 leading-relaxed">
+              You need at least 0.5 SOL to create circles.{' '}
+              <a 
+                href="https://faucet.solana.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 underline underline-offset-2"
+              >
+                Visit Solana Faucet
+                <ExternalLink className="w-3 h-3" />
+              </a>
+              {' '}if airdrop fails.
+            </p>
+          </div>
         </div>
       )}
     </div>
