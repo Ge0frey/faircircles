@@ -24,6 +24,7 @@ export function errorHandler(
   const apiError: ApiError = {
     error: statusCode === 401 ? 'Unauthorized' :
            statusCode === 404 ? 'Not Found' :
+           statusCode === 429 ? 'Rate Limit Exceeded' :
            'Internal Server Error',
     message: config.nodeEnv === 'development' 
       ? err.message 

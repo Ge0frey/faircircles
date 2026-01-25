@@ -3,7 +3,7 @@ import { useFairScore } from '../hooks/useFairScore';
 import { useCircleProgram } from '../hooks/useCircleProgram';
 import { useStore } from '../store/useStore';
 import type { Circle } from '../types';
-import { TIER_COLORS, getTierFromScore, lamportsToSOL } from '../types';
+import { TIER_COLORS, getTierFromScore100, lamportsToSOL } from '../types';
 import { getTierRequirementText } from '../lib/fairscale';
 import { 
   Users, 
@@ -14,22 +14,26 @@ import {
   Play,
   UserPlus,
   CheckCircle,
-  Lock
+  Lock,
+  X
 } from 'lucide-react';
 import { useState } from 'react';
 
 interface Props {
   circle: Circle;
   onSelect?: () => void;
+  showDismiss?: boolean;
+  onDismiss?: () => void;
 }
 
-export function CircleCard({ circle, onSelect }: Props) {
+export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }: Props) {
   const { publicKey } = useWallet();
   const { fairScore, isEligible } = useFairScore();
   const { joinCircle, startCircle } = useCircleProgram();
   const [loading, setLoading] = useState(false);
 
-  const tier = getTierFromScore(circle.minFairScore);
+  // Use getTierFromScore100 since minFairScore is on 0-100 scale
+  const tier = getTierFromScore100(circle.minFairScore);
   const colors = TIER_COLORS[tier];
   
   const isCreator = publicKey?.equals(circle.creator);
@@ -72,13 +76,27 @@ export function CircleCard({ circle, onSelect }: Props) {
     Cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
   };
 
+  const handleDismiss = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDismiss?.();
+  };
+
   return (
     <div
       onClick={onSelect}
       className="group relative bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800 hover:border-zinc-700 transition-all duration-300 cursor-pointer hover:shadow-xl hover:shadow-black/20"
     >
-      {/* Status Badge */}
-      <div className="absolute top-4 right-4">
+      {/* Status Badge and Dismiss Button */}
+      <div className="absolute top-4 right-4 flex items-center gap-2">
+        {showDismiss && circle.status === 'Completed' && (
+          <button
+            onClick={handleDismiss}
+            className="p-1.5 rounded-full bg-zinc-800 hover:bg-red-500/20 text-zinc-500 hover:text-red-400 transition-colors"
+            title="Remove from list"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        )}
         <span className={`px-3 py-1 rounded-full text-xs font-medium border ${statusColors[circle.status]}`}>
           {circle.status}
         </span>

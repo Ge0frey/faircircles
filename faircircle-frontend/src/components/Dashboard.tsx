@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useCircleProgram } from '../hooks/useCircleProgram';
 import { useStore } from '../store/useStore';
@@ -14,15 +14,27 @@ import {
   Plus, 
   Loader2,
   CircleDot,
-  Search
+  Search,
+  Eye
 } from 'lucide-react';
 
 export function Dashboard() {
   const { connected, publicKey } = useWallet();
   const { fetchAllCircles } = useCircleProgram();
-  const { activeTab, setActiveTab, circles, setCircles, circlesLoading, setCirclesLoading } = useStore();
+  const { 
+    activeTab, 
+    setActiveTab, 
+    circles, 
+    setCircles, 
+    circlesLoading, 
+    setCirclesLoading,
+    hiddenCircles,
+    hideCircle,
+    unhideCircle,
+  } = useStore();
   const [selectedCircle, setSelectedCircle] = useState<Circle | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showHidden, setShowHidden] = useState(false);
 
   useEffect(() => {
     if (connected) {
@@ -48,8 +60,25 @@ export function Dashboard() {
     { id: 'create' as const, label: 'Create', icon: Plus },
   ];
 
+  // Handle hiding a circle
+  const handleHideCircle = useCallback((circleAddress: string) => {
+    hideCircle(circleAddress);
+  }, [hideCircle]);
+
+  // Count of hidden completed circles for the badge
+  const hiddenCompletedCount = circles.filter(c => 
+    c.status === 'Completed' && hiddenCircles.includes(c.address.toBase58())
+  ).length;
+
   const filteredCircles = circles.filter(circle => {
     const matchesSearch = circle.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const circleAddress = circle.address.toBase58();
+    
+    // Filter out hidden circles unless showHidden is true
+    // Only hide completed circles, not forming or active ones
+    const isHidden = circle.status === 'Completed' && hiddenCircles.includes(circleAddress);
+    if (isHidden && !showHidden) return false;
+    
     if (activeTab === 'my-circles') {
       return matchesSearch && circle.members.some(m => publicKey?.equals(m.address));
     }
@@ -185,20 +214,46 @@ export function Dashboard() {
                   )}
 
                   {/* Completed Circles */}
-                  {completedCircles.length > 0 && (
+                  {(completedCircles.length > 0 || hiddenCompletedCount > 0) && (
                     <section>
-                      <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
-                        <div className="w-2 h-2 rounded-full bg-purple-400"></div>
-                        Completed ({completedCircles.length})
-                      </h2>
+                      <div className="flex items-center justify-between mb-4">
+                        <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                          <div className="w-2 h-2 rounded-full bg-purple-400"></div>
+                          Completed ({completedCircles.length})
+                        </h2>
+                        {hiddenCompletedCount > 0 && (
+                          <button
+                            onClick={() => setShowHidden(!showHidden)}
+                            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                            {showHidden ? 'Hide' : 'Show'} {hiddenCompletedCount} hidden
+                          </button>
+                        )}
+                      </div>
                       <div className="grid grid-cols-1 gap-4">
-                        {completedCircles.map((circle) => (
-                          <CircleCard
-                            key={circle.address.toBase58()}
-                            circle={circle}
-                            onSelect={() => setSelectedCircle(circle)}
-                          />
-                        ))}
+                        {completedCircles.map((circle) => {
+                          const circleAddress = circle.address.toBase58();
+                          const isHidden = hiddenCircles.includes(circleAddress);
+                          return (
+                            <div key={circleAddress} className={isHidden ? 'opacity-60' : ''}>
+                              <CircleCard
+                                circle={circle}
+                                onSelect={() => setSelectedCircle(circle)}
+                                showDismiss={activeTab === 'my-circles'}
+                                onDismiss={() => handleHideCircle(circleAddress)}
+                              />
+                              {isHidden && (
+                                <button
+                                  onClick={() => unhideCircle(circleAddress)}
+                                  className="mt-2 text-xs text-zinc-500 hover:text-white transition-colors"
+                                >
+                                  Restore to list
+                                </button>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
                     </section>
                   )}

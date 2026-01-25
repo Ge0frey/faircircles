@@ -2,7 +2,46 @@ import { API_BASE_URL } from './constants';
 import type { FairScoreResponse, FairTier } from '../types';
 
 /**
+ * Custom error class for rate limit errors
+ * When this error is thrown, the caller should preserve existing cached data
+ */
+export class RateLimitError extends Error {
+  constructor(message: string = 'Rate limit exceeded. Please try again later.') {
+    super(message);
+    this.name = 'RateLimitError';
+  }
+}
+
+/**
+ * Custom error class for network errors
+ * When this error is thrown, the caller should preserve existing cached data
+ */
+export class NetworkError extends Error {
+  constructor(message: string = 'Network error. Please check your connection.') {
+    super(message);
+    this.name = 'NetworkError';
+  }
+}
+
+/**
+ * Normalize FairScore to 0-1000 scale
+ * The API returns `fairscore` on a 0-100 scale (e.g., 65.3)
+ * We convert it to 0-1000 for consistent display
+ */
+export function normalizeFairScoreToThousand(score: number): number {
+  // If score is already > 100, it's likely already on 0-1000 scale
+  if (score > 100) {
+    return Math.round(score);
+  }
+  // Convert from 0-100 scale to 0-1000 scale
+  return Math.round(score * 10);
+}
+
+/**
  * Fetch complete FairScore data from backend API
+ * @throws {RateLimitError} When rate limited - caller should preserve cached data
+ * @throws {NetworkError} When network fails - caller should preserve cached data
+ * @throws {Error} For other errors
  */
 export async function fetchFairScore(wallet: string, twitter?: string): Promise<FairScoreResponse> {
   const params = new URLSearchParams({ wallet });
@@ -19,65 +58,30 @@ export async function fetchFairScore(wallet: string, twitter?: string): Promise<
         throw new Error('Unauthorized: Backend API key configuration issue');
       }
       if (response.status === 429) {
-        // Return a default response for rate-limited requests instead of throwing
-        console.warn('Rate limit exceeded, returning default unrated score');
-        return {
-          wallet,
-          fair_score: 0,
-          tier: 'unrated',
-          badges: [],
-          last_updated: new Date().toISOString(),
-          features: {
-            lst_percentile_score: 0,
-            major_percentile_score: 0,
-            native_sol_percentile: 0,
-            stable_percentile_score: 0,
-            tx_count: 0,
-            active_days: 0,
-            median_gap_hours: 0,
-            tempo_cv: 0,
-            burst_ratio: 0,
-            net_sol_flow_30d: 0,
-            median_hold_days: 0,
-            no_instant_dumps: 0,
-            conviction_ratio: 0,
-            platform_diversity: 0,
-            wallet_age_days: 0,
-          },
-        };
+        // Throw RateLimitError - caller should preserve existing cached data
+        console.warn('Rate limit exceeded - cached data should be preserved');
+        throw new RateLimitError();
       }
       throw new Error(error.message || `Failed to fetch FairScore: ${response.statusText}`);
     }
 
-    return response.json();
+    const data = await response.json();
+    
+    // Normalize the score to 0-1000 scale
+    return {
+      ...data,
+      fair_score: normalizeFairScoreToThousand(data.fair_score),
+    };
   } catch (error) {
-    // If it's a network error, return default response
+    // Re-throw RateLimitError as-is
+    if (error instanceof RateLimitError) {
+      throw error;
+    }
+    
+    // If it's a network error, throw NetworkError
     if (error instanceof TypeError && error.message.includes('fetch')) {
-      console.warn('Network error, returning default unrated score');
-      return {
-        wallet,
-        fair_score: 0,
-        tier: 'unrated',
-        badges: [],
-        last_updated: new Date().toISOString(),
-        features: {
-          lst_percentile_score: 0,
-          major_percentile_score: 0,
-          native_sol_percentile: 0,
-          stable_percentile_score: 0,
-          tx_count: 0,
-          active_days: 0,
-          median_gap_hours: 0,
-          tempo_cv: 0,
-          burst_ratio: 0,
-          net_sol_flow_30d: 0,
-          median_hold_days: 0,
-          no_instant_dumps: 0,
-          conviction_ratio: 0,
-          platform_diversity: 0,
-          wallet_age_days: 0,
-        },
-      };
+      console.warn('Network error - cached data should be preserved');
+      throw new NetworkError();
     }
     throw error;
   }

@@ -21,7 +21,7 @@ pub mod faircircle_solana_program {
         creator_fair_score: u8,  // creator's FairScore
     ) -> Result<()> {
         require!(name.len() <= CIRCLE_NAME_MAX_LEN, FairCircleError::NameTooLong);
-        require!(contribution_amount > 0, FairCircleError::InvalidContributionAmount);
+        require!(contribution_amount > 0, FairCircleError::InvalidContributionAmount);.
         require!(period_length > 0, FairCircleError::InvalidPeriodLength);
         require!(creator_fair_score >= min_fair_score, FairCircleError::InsufficientFairScore);
 

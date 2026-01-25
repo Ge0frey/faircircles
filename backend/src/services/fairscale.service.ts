@@ -12,8 +12,23 @@ const fairscaleApi = axios.create({
 });
 
 /**
+ * Normalize FairScore to 0-1000 scale
+ * The FairScale API returns `fairscore` on a 0-100 scale (e.g., 65.3)
+ * We convert it to 0-1000 for consistent display across the application
+ */
+function normalizeFairScoreToThousand(score: number): number {
+  // If score is already > 100, it's likely already on 0-1000 scale
+  if (score > 100) {
+    return Math.round(score);
+  }
+  // Convert from 0-100 scale to 0-1000 scale
+  return Math.round(score * 10);
+}
+
+/**
  * Fetch complete FairScore data including tier and badges
  * Normalizes the API response for the frontend
+ * Score is always returned on a 0-1000 scale
  */
 export async function getFairScore(
   wallet: string,
@@ -31,10 +46,10 @@ export async function getFairScore(
 
     const data = response.data;
     
-    // Normalize to frontend format
+    // Normalize to frontend format with score on 0-1000 scale
     return {
       wallet: data.wallet,
-      fair_score: data.fairscore,
+      fair_score: normalizeFairScoreToThousand(data.fairscore),
       tier: data.tier,
       badges: data.badges,
       last_updated: data.timestamp,

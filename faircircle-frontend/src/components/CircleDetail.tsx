@@ -3,7 +3,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useFairScore } from '../hooks/useFairScore';
 import { useCircleProgram } from '../hooks/useCircleProgram';
 import type { Circle } from '../types';
-import { TIER_COLORS, getTierFromScore, lamportsToSOL } from '../types';
+import { TIER_COLORS, getTierFromScore, getTierFromScore100, lamportsToSOL } from '../types';
 import { 
   ArrowLeft,
   Users, 
@@ -110,7 +110,8 @@ export function CircleDetail({ circle, onBack }: Props) {
     Cancelled: 'bg-red-500/20 text-red-400 border-red-500/30',
   };
 
-  const tier = getTierFromScore(circleData.minFairScore);
+  // Use getTierFromScore100 since minFairScore is on 0-100 scale
+  const tier = getTierFromScore100(circleData.minFairScore);
   const tierColors = TIER_COLORS[tier];
 
   // Sort members by payout order for display

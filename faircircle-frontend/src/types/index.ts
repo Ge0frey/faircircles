@@ -82,7 +82,18 @@ export interface CreateCircleParams {
   minFairScore: number; // 0-100
 }
 
+// Tier thresholds on the 0-1000 scale
+// Score is normalized to 0-1000 for consistent display
 export const TIER_THRESHOLDS = {
+  platinum: 800,
+  gold: 600,
+  silver: 400,
+  bronze: 200,
+  unrated: 0,
+} as const;
+
+// Original tier thresholds on 0-100 scale (used for circle min score requirements)
+export const TIER_THRESHOLDS_100 = {
   platinum: 80,
   gold: 60,
   silver: 40,
@@ -123,11 +134,27 @@ export const TIER_COLORS = {
   },
 } as const;
 
+/**
+ * Get tier from a score on the 0-1000 scale
+ * Use this for FairScore values from the API
+ */
 export function getTierFromScore(score: number): FairTier {
   if (score >= TIER_THRESHOLDS.platinum) return 'platinum';
   if (score >= TIER_THRESHOLDS.gold) return 'gold';
   if (score >= TIER_THRESHOLDS.silver) return 'silver';
   if (score >= TIER_THRESHOLDS.bronze) return 'bronze';
+  return 'unrated';
+}
+
+/**
+ * Get tier from a score on the 0-100 scale
+ * Use this for circle minimum score requirements (stored on-chain as 0-100)
+ */
+export function getTierFromScore100(score: number): FairTier {
+  if (score >= TIER_THRESHOLDS_100.platinum) return 'platinum';
+  if (score >= TIER_THRESHOLDS_100.gold) return 'gold';
+  if (score >= TIER_THRESHOLDS_100.silver) return 'silver';
+  if (score >= TIER_THRESHOLDS_100.bronze) return 'bronze';
   return 'unrated';
 }
 

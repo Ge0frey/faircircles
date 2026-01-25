@@ -7,13 +7,15 @@ import {
   TrendingUp, 
   Award,
   RefreshCw,
-  AlertCircle
+  AlertCircle,
+  AlertTriangle
 } from 'lucide-react';
 
 export function FairScoreCard() {
-  const { fairScore, loading, error, refetch } = useFairScore();
+  const { fairScore, loading, error, refetch, clearError } = useFairScore();
 
-  if (loading) {
+  // Show loading state only if we don't have cached data
+  if (loading && !fairScore) {
     return (
       <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-6 border border-zinc-800">
         <div className="animate-pulse space-y-4">
@@ -25,7 +27,8 @@ export function FairScoreCard() {
     );
   }
 
-  if (error) {
+  // Show error state only if we don't have cached data to fall back on
+  if (error && !fairScore) {
     return (
       <div className="bg-zinc-900/80 backdrop-blur-xl rounded-2xl p-6 border border-red-900/50">
         <div className="flex items-center gap-3 text-red-400 mb-4">
@@ -71,12 +74,27 @@ export function FairScoreCard() {
         </h3>
         <button
           onClick={refetch}
-          className="p-2 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-white"
+          disabled={loading}
+          className={`p-2 rounded-lg hover:bg-zinc-800 transition-colors text-zinc-500 hover:text-white ${loading ? 'animate-spin' : ''}`}
           title="Refresh score"
         >
           <RefreshCw className="w-4 h-4" />
         </button>
       </div>
+
+      {/* Warning banner for rate limit errors when we have cached data */}
+      {error && fairScore && (
+        <div className="flex items-center gap-2 p-3 bg-amber-500/10 border border-amber-500/30 rounded-lg text-amber-400 text-sm">
+          <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+          <span>{error} (Showing cached score)</span>
+          <button
+            onClick={clearError}
+            className="ml-auto text-amber-400/70 hover:text-amber-400"
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {/* Score Display */}
       <div className={`relative overflow-hidden rounded-xl p-6 ${colors.bg} ${colors.glow} shadow-lg`}>
