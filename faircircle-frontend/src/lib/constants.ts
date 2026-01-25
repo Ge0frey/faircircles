@@ -1,7 +1,9 @@
 import { PublicKey } from '@solana/web3.js';
 
-// Backend API URL (uses Vite proxy in development)
-export const API_BASE_URL = '/api';
+// Backend API URL
+// In production: reads from VITE_API_BASE_URL environment variable
+// In development: falls back to '/api' which uses Vite proxy
+export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 // Program ID (public, safe to expose)
 export const PROGRAM_ID = new PublicKey('FeuH9rfHZ8XuMQrFVdWHP6MEA4e4fqtF95Bbi3aiMZdk');
