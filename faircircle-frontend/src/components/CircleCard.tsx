@@ -1,7 +1,6 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useFairScore } from '../hooks/useFairScore';
 import { useCircleProgram } from '../hooks/useCircleProgram';
-import { useStore } from '../store/useStore';
 import type { Circle } from '../types';
 import { TIER_COLORS, getTierFromScore100, lamportsToSOL } from '../types';
 import { getTierRequirementText } from '../lib/fairscale';

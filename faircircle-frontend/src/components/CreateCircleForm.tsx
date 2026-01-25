@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export function CreateCircleForm() {
-  const { connected, publicKey } = useWallet();
+  const { connected } = useWallet();
   const { fairScore } = useFairScore();
   const { createCircle } = useCircleProgram();
   const { setActiveTab } = useStore();

@@ -88,7 +88,7 @@ export const useStore = create<AppState>()(
       selectedCircle: null,
       circlesLoading: false,
       setCircles: (circles) => set({ circles }),
-      setUserCircles: (circles) => set({ userCircles }),
+      setUserCircles: (userCircles) => set({ userCircles }),
       setSelectedCircle: (circle) => set({ selectedCircle: circle }),
       setCirclesLoading: (loading) => set({ circlesLoading: loading }),
       addCircle: (circle) => set((state) => ({ circles: [...state.circles, circle] })),

@@ -88,8 +88,8 @@ export function useCircleProgram() {
         );
       }
 
-      const tx = await program.methods
-        .createCircle(name, lamports, new BN(periodLength), minFairScore, Math.round(creatorFairScore))
+      const tx = await (program.methods
+        .createCircle(name, lamports, new BN(periodLength), minFairScore, Math.round(creatorFairScore)) as any)
         .accounts({
           creator: wallet.publicKey,
           circle: circlePDA,
@@ -137,8 +137,8 @@ export function useCircleProgram() {
     const [circlePDA] = getCirclePDA(circleCreator);
 
     try {
-      const tx = await program.methods
-        .joinCircle(Math.round(fairScore))
+      const tx = await (program.methods
+        .joinCircle(Math.round(fairScore)) as any)
         .accounts({
           member: wallet.publicKey,
           circle: circlePDA,
@@ -171,8 +171,8 @@ export function useCircleProgram() {
     const [circlePDA] = getCirclePDA(wallet.publicKey);
 
     try {
-      const tx = await program.methods
-        .startCircle()
+      const tx = await (program.methods
+        .startCircle() as any)
         .accounts({
           creator: wallet.publicKey,
           circle: circlePDA,
@@ -206,8 +206,8 @@ export function useCircleProgram() {
     const [escrowPDA] = getEscrowPDA(circleCreator);
 
     try {
-      const tx = await program.methods
-        .contribute()
+      const tx = await (program.methods
+        .contribute() as any)
         .accounts({
           member: wallet.publicKey,
           circle: circlePDA,
@@ -243,8 +243,8 @@ export function useCircleProgram() {
     const [escrowPDA] = getEscrowPDA(circleCreator);
 
     try {
-      const tx = await program.methods
-        .claimPayout()
+      const tx = await (program.methods
+        .claimPayout() as any)
         .accounts({
           recipient: wallet.publicKey,
           circle: circlePDA,

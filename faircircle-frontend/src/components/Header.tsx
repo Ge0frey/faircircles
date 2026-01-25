@@ -1,14 +1,12 @@
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui';
 import { useFairScore } from '../hooks/useFairScore';
-import { useStore } from '../store/useStore';
 import { TIER_COLORS, getTierFromScore } from '../types';
 import { Shield } from 'lucide-react';
 
 export function Header() {
-  const { connected, publicKey, disconnect } = useWallet();
+  const { connected, disconnect } = useWallet();
   const { fairScore } = useFairScore();
-  const { setActiveTab } = useStore();
 
   const tier = fairScore ? (fairScore.tier || getTierFromScore(fairScore.fair_score)) : 'unrated';
   const colors = TIER_COLORS[tier];

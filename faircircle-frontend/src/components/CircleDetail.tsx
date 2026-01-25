@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useFairScore } from '../hooks/useFairScore';
 import { useCircleProgram } from '../hooks/useCircleProgram';
@@ -13,7 +13,6 @@ import {
   Trophy,
   ChevronDown,
   ChevronUp,
-  Wallet,
   CheckCircle2,
   Circle as CircleIcon,
   AlertTriangle,
@@ -140,13 +139,6 @@ export function CircleDetail({ circle, onBack }: Props) {
   // Use getTierFromScore100 since minFairScore is on 0-100 scale
   const tier = getTierFromScore100(circleData.minFairScore);
   const tierColors = TIER_COLORS[tier];
-
-  // Sort members by payout order for display
-  const sortedMembers = [...circleData.members].sort((a, b) => {
-    const aOrder = circleData.payoutOrder.indexOf(circleData.members.indexOf(a));
-    const bOrder = circleData.payoutOrder.indexOf(circleData.members.indexOf(b));
-    return aOrder - bOrder;
-  });
 
   const contributedCount = circleData.members.filter((_, i) => circleData.members[i]?.hasContributed).length;
 
