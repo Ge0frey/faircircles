@@ -1,4 +1,8 @@
-> **🎬 [Demo Video](https://youtu.be/e8lzBxysc6o)** | **🚀 [Live Prototype](https://faircircle.vercel.app/)** | **🔗 [Devnet Program](https://explorer.solana.com/address/FeuH9rfHZ8XuMQrFVdWHP6MEA4e4fqtF95Bbi3aiMZdk?cluster=devnet)**
+## Access platform from - https://faircircle.vercel.app/
+
+# Quick links
+### Video demo link with commentary -  [https://youtu.be/e8lzBxysc6o](https://youtu.be/e8lzBxysc6o)
+
 
 # FairCircles - Reputation-Based Lending Circles (ROSCAs)
 
