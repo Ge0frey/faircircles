@@ -1,3 +1,5 @@
+> **🎬 [Demo Video](https://youtu.be/e8lzBxysc6o)** | **🚀 [Live Prototype](https://faircircle.vercel.app/)** | **🔗 [Devnet Program](https://explorer.solana.com/address/FeuH9rfHZ8XuMQrFVdWHP6MEA4e4fqtF95Bbi3aiMZdk?cluster=devnet)**
+
 # FairCircles - Reputation-Based Lending Circles (ROSCAs)
 
 [![Solana](https://img.shields.io/badge/Solana-Devnet-blueviolet)](https://solana.com)
@@ -5,6 +7,7 @@
 [![Anchor](https://img.shields.io/badge/Anchor-0.32-blue)](https://www.anchor-lang.com/)
 [![React](https://img.shields.io/badge/React-19-61dafb)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
+
 
 FairCircles brings the centuries-old tradition of Rotating Savings and Credit Associations (ROSCAs) to Solana, powered by [FairScale](https://fairscale.xyz) reputation scoring.
 
