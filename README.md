@@ -1665,13 +1665,13 @@ msg!("Debug: current_round = {}", circle.current_round);
 
 ##  FairScore Tiers
 
-| Tier | Range | Color | Badge | Access |
-|------|-------|-------|-------|--------|
-| 🏆 **Platinum** | 80-100 | Purple | Highest | All circles |
-| 🥇 **Gold** | 60-79 | Yellow | High | Most circles |
-| 🥈 **Silver** | 40-59 | Gray | Medium | Standard circles |
-| 🥉 **Bronze** | 20-39 | Brown | Low | Entry circles |
-| ⚫ **Unrated** | 0-19 | Black | None | Limited access |
+| Tier | 
+|------|
+| 🏆 **Platinum** |
+| 🥇 **Gold** | 
+| 🥈 **Silver** | 
+| 🥉 **Bronze** | 
+| ⚫ **Unrated** | 
 
 **Tier Benefits**:
 - Higher tier = Earlier payout position
