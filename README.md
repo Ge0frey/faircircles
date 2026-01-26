@@ -2,8 +2,8 @@
 
 [![Solana](https://img.shields.io/badge/Solana-Devnet-blueviolet)](https://solana.com)
 [![FairScale](https://img.shields.io/badge/Powered%20by-FairScale-green)](https://fairscale.xyz)
-[![Anchor](https://img.shields.io/badge/Anchor-0.30-blue)](https://www.anchor-lang.com/)
-[![React](https://img.shields.io/badge/React-18-61dafb)](https://reactjs.org/)
+[![Anchor](https://img.shields.io/badge/Anchor-0.32-blue)](https://www.anchor-lang.com/)
+[![React](https://img.shields.io/badge/React-19-61dafb)](https://reactjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-blue)](https://www.typescriptlang.org/)
 
 FairCircles brings the centuries-old tradition of Rotating Savings and Credit Associations (ROSCAs) to Solana, powered by [FairScale](https://fairscale.xyz) reputation scoring.
@@ -18,7 +18,7 @@ Known globally as **chit funds** (India), **tandas** (Latin America), **susus** 
 - [How It Works](#-how-it-works)
 - [FairScale Integration](#-fairscale-integration)
 - [Complete User Flow](#-complete-user-flow)
-- [Architecture](#-architecture)
+- [Architecture](#-architecture) | [Detailed Diagrams](./Architecture.md)
 - [Project Structure](#-project-structure)
 - [Setup & Installation](#-setup--installation)
 - [Configuration](#-configuration)
@@ -363,58 +363,62 @@ Process repeats:
 
 ## 🏗 Architecture
 
+> 📘 **For comprehensive architecture diagrams, see [Architecture.md](./Architecture.md)** — includes detailed component diagrams, data flows, Solana program account structures, state machines, and deployment architecture.
+
 ### System Overview
 
 ```
-┌────────────────────────────────────────────────────────────────────┐
-│                         USER (Browser)                              │
-│                    Phantom / Solflare Wallet                        │
-└───────────────────────────────┬────────────────────────────────────┘
-                                │
-                                │ HTTP / WebSocket
-                                │
-┌───────────────────────────────┴────────────────────────────────────┐
-│                    FRONTEND (React + Vite)                          │
-│                    http://localhost:5173                            │
-├─────────────────────────────────────────────────────────────────────┤
-│  Components (UI Layer)                                              │
-│  ├── LandingPage.tsx         Landing with feature showcase          │
-│  ├── Dashboard.tsx           Main app container                     │
-│  ├── Header.tsx              Wallet connect + FairScore display     │
-│  ├── FairScoreCard.tsx       Detailed score breakdown               │
-│  ├── CreateCircleForm.tsx    Circle creation form                   │
-│  ├── CircleCard.tsx          Circle preview cards                   │
-│  ├── CircleDetail.tsx        Individual circle management           │
-│  ├── WalletBalance.tsx       SOL balance + airdrop                  │
-│  └── Notifications.tsx       Toast notifications                    │
-├─────────────────────────────────────────────────────────────────────┤
-│  Hooks (Business Logic)                                             │
-│  ├── useCircleProgram.ts     Solana program interactions            │
-│  └── useFairScore.ts         FairScore fetching & caching           │
-├─────────────────────────────────────────────────────────────────────┤
-│  State Management (Zustand)                                         │
-│  └── useStore.ts             Global state: fairScore, notifications │
-├─────────────────────────────────────────────────────────────────────┤
-│  Libraries                                                          │
-│  ├── fairscale.ts            FairScale API client                   │
-│  ├── solana.ts               Solana utilities (balance, airdrop)    │
-│  ├── idl.ts                  Anchor IDL for program                 │
-│  └── constants.ts            Config constants                       │
-└────────────────┬───────────────────────────────────┬────────────────┘
-                 │                                   │
-        ┌────────┴────────┐                 ┌────────┴─────────┐
-        │  BACKEND API    │                 │ SOLANA PROGRAM   │
-        │ (Express.js)    │                 │ (Anchor/Rust)    │
-        │ localhost:3001  │                 │ Devnet           │
-        └────────┬────────┘                 └────────┬─────────┘
-                 │                                   │
-                 │ HTTPS                             │ RPC Calls
-                 │                                   │
-        ┌────────┴────────┐                 ┌────────┴─────────┐
-        │  FairScale API  │                 │ Solana Blockchain│
-        │ api.fairscale.  │                 │ (Devnet)         │
-        │      xyz        │                 │                  │
-        └─────────────────┘                 └──────────────────┘
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    USER (Browser)                                       │
+│                              Phantom / Solflare Wallet                                  │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
+                                          │
+              ┌───────────────────────────┴───────────────────────────┐
+              │                                                       │
+              ▼                                                       ▼
+┌──────────────────────────────────┐                 ┌──────────────────────────────────┐
+│      FRONTEND (React 19)         │                 │          BACKEND                 │
+│      Vite 7 + TypeScript         │                 │    (Express.js 5 + TypeScript)   │
+│      http://localhost:5173       │                 │      http://localhost:3001       │
+│                                  │    REST API     │                                  │
+│  ┌────────────────────────────┐  │   /api/*        │  ┌────────────────────────────┐  │
+│  │     Components Layer       │  │◄───────────────►│  │   FairScale Service        │  │
+│  │  Dashboard, CircleCard,    │  │                 │  │   Score Proxy & Normalize  │  │
+│  │  CircleDetail, CreateForm  │  │                 │  └────────────────────────────┘  │
+│  └────────────────────────────┘  │                 │                │                │
+│  ┌────────────────────────────┐  │                 │                ▼                │
+│  │      Hooks Layer           │  │                 │  ┌────────────────────────────┐  │
+│  │  useCircleProgram          │  │                 │  │   FairScale External API   │  │
+│  │  useFairScore              │  │                 │  │   api.fairscale.xyz        │  │
+│  └────────────────────────────┘  │                 │  └────────────────────────────┘  │
+│  ┌────────────────────────────┐  │                 │                                  │
+│  │  State (Zustand 5.0)       │  │                 └──────────────────────────────────┘
+│  │  Circles, FairScore Cache  │  │
+│  └────────────────────────────┘  │
+└──────────────────────────────────┘
+              │
+              │ RPC Calls (Anchor SDK)
+              ▼
+┌──────────────────────────────────┐
+│   SOLANA BLOCKCHAIN (Devnet)     │
+│                                  │
+│  ┌────────────────────────────┐  │
+│  │  FairCircle Solana Program │  │
+│  │  (Anchor 0.32 / Rust)      │  │
+│  │                            │  │
+│  │  Instructions:             │  │
+│  │  • create_circle           │  │
+│  │  • join_circle             │  │
+│  │  • start_circle            │  │
+│  │  • contribute              │  │
+│  │  • claim_payout            │  │
+│  │  • update_fair_score       │  │
+│  │                            │  │
+│  │  PDAs:                     │  │
+│  │  • Circle Account          │  │
+│  │  • Escrow Account          │  │
+│  └────────────────────────────┘  │
+└──────────────────────────────────┘
 ```
 
 ### Data Flow Examples
@@ -475,6 +479,7 @@ Frontend: Refresh circles list
 ```
 FAIRCIRCLES/
 ├── README.md                           # This file
+├── Architecture.md                     # Detailed architecture diagrams
 ├── .gitignore
 │
 ├── faircircle-frontend/                # React Frontend Application
@@ -623,7 +628,7 @@ solana --version  # 1.18.0 or higher
 solana-keygen --version
 
 # Anchor CLI (for Solana program development)
-anchor --version  # 0.30.0 or higher
+anchor --version  # 0.32.0 or higher
 ```
 
 If you don't have these, install them:
@@ -642,8 +647,8 @@ sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
 
 # Anchor
 cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-avm install 0.30.1
-avm use 0.30.1
+avm install 0.32.1
+avm use 0.32.1
 ```
 
 ### 1. Clone the Repository
