@@ -15,6 +15,22 @@ function parseCircleStatus(status: Record<string, unknown>): CircleStatus {
   return 'Forming';
 }
 
+/**
+ * Scale FairScore to u8 (0-255) for Solana program
+ * - FairScore from API is normalized to 0-1000 scale
+ * - minFairScore from UI is on 0-100 scale
+ * - Solana program expects u8 (0-255)
+ */
+function scaleFairScoreToU8(score: number, isFromThousandScale: boolean = true): number {
+  if (isFromThousandScale) {
+    // Scale from 0-1000 to 0-255
+    return Math.min(255, Math.max(0, Math.round(score * 255 / 1000)));
+  } else {
+    // Scale from 0-100 to 0-255
+    return Math.min(255, Math.max(0, Math.round(score * 255 / 100)));
+  }
+}
+
 export function useCircleProgram() {
   const { connection } = useConnection();
   const wallet = useWallet();
@@ -88,8 +104,13 @@ export function useCircleProgram() {
         );
       }
 
+      // Scale FairScore values to u8 (0-255) for Solana program
+      // creatorFairScore is on 0-1000 scale, minFairScore is on 0-100 scale
+      const scaledCreatorFairScore = scaleFairScoreToU8(creatorFairScore, true);
+      const scaledMinFairScore = scaleFairScoreToU8(minFairScore, false);
+
       const tx = await (program.methods
-        .createCircle(name, lamports, new BN(periodLength), minFairScore, Math.round(creatorFairScore)) as any)
+        .createCircle(name, lamports, new BN(periodLength), scaledMinFairScore, scaledCreatorFairScore) as any)
         .accounts({
           creator: wallet.publicKey,
           circle: circlePDA,
@@ -137,8 +158,11 @@ export function useCircleProgram() {
     const [circlePDA] = getCirclePDA(circleCreator);
 
     try {
+      // Scale FairScore from 0-1000 scale to u8 (0-255) for Solana program
+      const scaledFairScore = scaleFairScoreToU8(fairScore, true);
+      
       const tx = await (program.methods
-        .joinCircle(Math.round(fairScore)) as any)
+        .joinCircle(scaledFairScore) as any)
         .accounts({
           member: wallet.publicKey,
           circle: circlePDA,

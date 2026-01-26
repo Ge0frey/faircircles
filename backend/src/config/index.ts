@@ -26,8 +26,10 @@ export const config = {
     programId: process.env.PROGRAM_ID || '',
   },
   
-  // CORS
-  corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5173').split(','),
+  // CORS - trim whitespace and remove trailing slashes from origins
+  corsOrigins: (process.env.CORS_ORIGINS || 'http://localhost:5173')
+    .split(',')
+    .map(origin => origin.trim().replace(/\/+$/, '')),
 } as const;
 
 // Validate required environment variables
