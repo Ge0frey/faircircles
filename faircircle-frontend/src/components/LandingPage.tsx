@@ -341,25 +341,21 @@ export function LandingPage() {
             <div className="rounded-xl p-6 bg-gradient-to-br from-slate-200 to-slate-100 text-slate-800">
               <Shield className="w-6 h-6 mb-3 opacity-70" />
               <h3 className="text-lg font-bold mb-1">Platinum</h3>
-              <p className="text-sm opacity-70 mb-3">80+ FairScore</p>
               <p className="text-xs opacity-60">First priority payouts</p>
             </div>
             <div className="rounded-xl p-6 bg-gradient-to-br from-amber-400 to-yellow-400 text-amber-900">
               <Shield className="w-6 h-6 mb-3 opacity-70" />
               <h3 className="text-lg font-bold mb-1">Gold</h3>
-              <p className="text-sm opacity-70 mb-3">60+ FairScore</p>
               <p className="text-xs opacity-60">Early fund access</p>
             </div>
             <div className="rounded-xl p-6 bg-gradient-to-br from-gray-300 to-gray-200 text-gray-800">
               <Shield className="w-6 h-6 mb-3 opacity-70" />
               <h3 className="text-lg font-bold mb-1">Silver</h3>
-              <p className="text-sm opacity-70 mb-3">40+ FairScore</p>
               <p className="text-xs opacity-60">Standard queue position</p>
             </div>
             <div className="rounded-xl p-6 bg-gradient-to-br from-orange-500 to-amber-500 text-orange-100">
               <Shield className="w-6 h-6 mb-3 opacity-70" />
               <h3 className="text-lg font-bold mb-1">Bronze</h3>
-              <p className="text-sm opacity-70 mb-3">20+ FairScore</p>
               <p className="text-xs opacity-60">Proves commitment first</p>
             </div>
           </div>

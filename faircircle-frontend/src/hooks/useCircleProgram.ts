@@ -62,16 +62,16 @@ export function useCircleProgram() {
     }
   }, [provider]);
 
-  const getCirclePDA = useCallback((creator: PublicKey) => {
+  const getCirclePDA = useCallback((creator: PublicKey, name: string) => {
     return PublicKey.findProgramAddressSync(
-      [Buffer.from('circle'), creator.toBuffer()],
+      [Buffer.from('circle'), creator.toBuffer(), Buffer.from(name)],
       PROGRAM_ID
     );
   }, []);
 
-  const getEscrowPDA = useCallback((creator: PublicKey) => {
+  const getEscrowPDA = useCallback((creator: PublicKey, name: string) => {
     return PublicKey.findProgramAddressSync(
-      [Buffer.from('escrow'), creator.toBuffer()],
+      [Buffer.from('escrow'), creator.toBuffer(), Buffer.from(name)],
       PROGRAM_ID
     );
   }, []);
@@ -87,8 +87,8 @@ export function useCircleProgram() {
       throw new Error('Wallet not connected');
     }
 
-    const [circlePDA] = getCirclePDA(wallet.publicKey);
-    const [escrowPDA] = getEscrowPDA(wallet.publicKey);
+    const [circlePDA] = getCirclePDA(wallet.publicKey, name);
+    const [escrowPDA] = getEscrowPDA(wallet.publicKey, name);
 
     const lamports = new BN(contributionAmount * LAMPORTS_PER_SOL);
 
@@ -104,9 +104,12 @@ export function useCircleProgram() {
         );
       }
 
-      // Scale FairScore values to u8 (0-255) for Solana program
-      // creatorFairScore is on 0-1000 scale, minFairScore is on 0-100 scale
-      const scaledCreatorFairScore = scaleFairScoreToU8(creatorFairScore, true);
+      // Normalize creatorFairScore from 0-1000 scale to 0-100 scale
+      // Then scale both to u8 (0-255) for Solana program
+      const creatorFairScoreOn100Scale = creatorFairScore / 10; // Convert 0-1000 to 0-100
+      
+      // Scale both to u8 (0-255) - now they're on the same scale (0-100) before scaling
+      const scaledCreatorFairScore = scaleFairScoreToU8(creatorFairScoreOn100Scale, false);
       const scaledMinFairScore = scaleFairScoreToU8(minFairScore, false);
 
       const tx = await (program.methods
@@ -138,6 +141,9 @@ export function useCircleProgram() {
           errorMessage = 
             'Insufficient SOL balance. You need at least 0.5 SOL for account creation. ' +
             'Visit https://faucet.solana.com to get devnet SOL.';
+        } else if (errorMessage.includes('InsufficientFairScore') || errorMessage.includes('does not meet')) {
+          // Keep the original error message for FairScore issues
+          // It's already user-friendly
         }
       }
       
@@ -150,12 +156,10 @@ export function useCircleProgram() {
     }
   }, [program, wallet.publicKey, getCirclePDA, getEscrowPDA, addNotification, connection]);
 
-  const joinCircle = useCallback(async (circleCreator: PublicKey, fairScore: number) => {
+  const joinCircle = useCallback(async (circleAddress: PublicKey, fairScore: number) => {
     if (!program || !wallet.publicKey) {
       throw new Error('Wallet not connected');
     }
-
-    const [circlePDA] = getCirclePDA(circleCreator);
 
     try {
       // Scale FairScore from 0-1000 scale to u8 (0-255) for Solana program
@@ -165,7 +169,7 @@ export function useCircleProgram() {
         .joinCircle(scaledFairScore) as any)
         .accounts({
           member: wallet.publicKey,
-          circle: circlePDA,
+          circle: circleAddress,
         })
         .rpc();
 
@@ -185,21 +189,19 @@ export function useCircleProgram() {
       });
       throw error;
     }
-  }, [program, wallet.publicKey, getCirclePDA, addNotification]);
+  }, [program, wallet.publicKey, addNotification]);
 
-  const startCircle = useCallback(async () => {
+  const startCircle = useCallback(async (circleAddress: PublicKey) => {
     if (!program || !wallet.publicKey) {
       throw new Error('Wallet not connected');
     }
-
-    const [circlePDA] = getCirclePDA(wallet.publicKey);
 
     try {
       const tx = await (program.methods
         .startCircle() as any)
         .accounts({
           creator: wallet.publicKey,
-          circle: circlePDA,
+          circle: circleAddress,
         })
         .rpc();
 
@@ -219,22 +221,21 @@ export function useCircleProgram() {
       });
       throw error;
     }
-  }, [program, wallet.publicKey, getCirclePDA, addNotification]);
+  }, [program, wallet.publicKey, addNotification]);
 
-  const contribute = useCallback(async (circleCreator: PublicKey) => {
+  const contribute = useCallback(async (circleAddress: PublicKey, circleName: string, circleCreator: PublicKey) => {
     if (!program || !wallet.publicKey) {
       throw new Error('Wallet not connected');
     }
 
-    const [circlePDA] = getCirclePDA(circleCreator);
-    const [escrowPDA] = getEscrowPDA(circleCreator);
+    const [escrowPDA] = getEscrowPDA(circleCreator, circleName);
 
     try {
       const tx = await (program.methods
         .contribute() as any)
         .accounts({
           member: wallet.publicKey,
-          circle: circlePDA,
+          circle: circleAddress,
           escrow: escrowPDA,
           systemProgram: SystemProgram.programId,
         })
@@ -256,22 +257,21 @@ export function useCircleProgram() {
       });
       throw error;
     }
-  }, [program, wallet.publicKey, getCirclePDA, getEscrowPDA, addNotification]);
+  }, [program, wallet.publicKey, getEscrowPDA, addNotification]);
 
-  const claimPayout = useCallback(async (circleCreator: PublicKey) => {
+  const claimPayout = useCallback(async (circleAddress: PublicKey, circleName: string, circleCreator: PublicKey) => {
     if (!program || !wallet.publicKey) {
       throw new Error('Wallet not connected');
     }
 
-    const [circlePDA] = getCirclePDA(circleCreator);
-    const [escrowPDA] = getEscrowPDA(circleCreator);
+    const [escrowPDA] = getEscrowPDA(circleCreator, circleName);
 
     try {
       const tx = await (program.methods
         .claimPayout() as any)
         .accounts({
           recipient: wallet.publicKey,
-          circle: circlePDA,
+          circle: circleAddress,
           escrow: escrowPDA,
         })
         .rpc();
@@ -292,15 +292,13 @@ export function useCircleProgram() {
       });
       throw error;
     }
-  }, [program, wallet.publicKey, getCirclePDA, getEscrowPDA, addNotification]);
+  }, [program, wallet.publicKey, getEscrowPDA, addNotification]);
 
-  const fetchCircle = useCallback(async (circleCreator: PublicKey): Promise<Circle | null> => {
+  const fetchCircle = useCallback(async (circleAddress: PublicKey): Promise<Circle | null> => {
     if (!program) return null;
 
-    const [circlePDA] = getCirclePDA(circleCreator);
-
     try {
-      const circleAccount = await (program.account as any).circle.fetch(circlePDA);
+      const circleAccount = await (program.account as any).circle.fetch(circleAddress);
       
       const members = [];
       for (let i = 0; i < circleAccount.memberCount; i++) {
@@ -316,7 +314,7 @@ export function useCircleProgram() {
       }
 
       return {
-        address: circlePDA,
+        address: circleAddress,
         creator: circleAccount.creator,
         name: circleAccount.name,
         contributionAmount: circleAccount.contributionAmount.toNumber(),
@@ -336,7 +334,7 @@ export function useCircleProgram() {
       console.error('Failed to fetch circle:', error);
       return null;
     }
-  }, [program, getCirclePDA]);
+  }, [program]);
 
   const fetchAllCircles = useCallback(async (): Promise<Circle[]> => {
     if (!program) return [];

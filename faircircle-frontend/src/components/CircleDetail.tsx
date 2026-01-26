@@ -55,14 +55,14 @@ export function CircleDetail({ circle, onBack }: Props) {
   const canStart = isCreator && circleData.status === 'Forming' && circleData.memberCount >= 3;
 
   const refreshCircle = async () => {
-    const updated = await fetchCircle(circleData.creator);
+    const updated = await fetchCircle(circleData.address);
     if (updated) setCircleData(updated);
   };
 
   const handleContribute = async () => {
     setLoading(true);
     try {
-      await contribute(circleData.creator);
+      await contribute(circleData.address, circleData.name, circleData.creator);
       await refreshCircle();
     } finally {
       setLoading(false);
@@ -72,7 +72,7 @@ export function CircleDetail({ circle, onBack }: Props) {
   const handleClaim = async () => {
     setLoading(true);
     try {
-      await claimPayout(circleData.creator);
+      await claimPayout(circleData.address, circleData.name, circleData.creator);
       await refreshCircle();
     } finally {
       setLoading(false);
@@ -83,7 +83,7 @@ export function CircleDetail({ circle, onBack }: Props) {
     if (!fairScore) return;
     setLoading(true);
     try {
-      await joinCircle(circleData.creator, fairScore.fair_score);
+      await joinCircle(circleData.address, fairScore.fair_score);
       await refreshCircle();
     } finally {
       setLoading(false);
@@ -93,7 +93,7 @@ export function CircleDetail({ circle, onBack }: Props) {
   const handleStart = async () => {
     setLoading(true);
     try {
-      await startCircle();
+      await startCircle(circleData.address);
       await refreshCircle();
     } finally {
       setLoading(false);

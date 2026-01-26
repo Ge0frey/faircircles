@@ -23,7 +23,8 @@ pub mod faircircle_solana_program {
         require!(name.len() <= CIRCLE_NAME_MAX_LEN, FairCircleError::NameTooLong);
         require!(contribution_amount > 0, FairCircleError::InvalidContributionAmount);
         require!(period_length > 0, FairCircleError::InvalidPeriodLength);
-        require!(creator_fair_score >= min_fair_score, FairCircleError::InsufficientFairScore);
+        // Note: Creator can create circles regardless of their own FairScore
+        // The min_fair_score only applies to members joining the circle
 
         let circle = &mut ctx.accounts.circle;
         let clock = Clock::get()?;
@@ -226,7 +227,7 @@ pub struct CreateCircle<'info> {
         init,
         payer = creator,
         space = Circle::SIZE,
-        seeds = [b"circle", creator.key().as_ref()],
+        seeds = [b"circle", creator.key().as_ref(), name.as_bytes()],
         bump
     )]
     pub circle: Account<'info, Circle>,
@@ -235,7 +236,7 @@ pub struct CreateCircle<'info> {
         init,
         payer = creator,
         space = 8,
-        seeds = [b"escrow", creator.key().as_ref()],
+        seeds = [b"escrow", creator.key().as_ref(), name.as_bytes()],
         bump
     )]
     /// CHECK: This is the escrow account that holds the pooled funds
@@ -251,7 +252,7 @@ pub struct JoinCircle<'info> {
     
     #[account(
         mut,
-        seeds = [b"circle", circle.creator.as_ref()],
+        seeds = [b"circle", circle.creator.as_ref(), circle.name.as_bytes()],
         bump = circle.bump
     )]
     pub circle: Account<'info, Circle>,
@@ -264,7 +265,7 @@ pub struct StartCircle<'info> {
     
     #[account(
         mut,
-        seeds = [b"circle", creator.key().as_ref()],
+        seeds = [b"circle", creator.key().as_ref(), circle.name.as_bytes()],
         bump = circle.bump
     )]
     pub circle: Account<'info, Circle>,
@@ -277,14 +278,14 @@ pub struct Contribute<'info> {
     
     #[account(
         mut,
-        seeds = [b"circle", circle.creator.as_ref()],
+        seeds = [b"circle", circle.creator.as_ref(), circle.name.as_bytes()],
         bump = circle.bump
     )]
     pub circle: Account<'info, Circle>,
     
     #[account(
         mut,
-        seeds = [b"escrow", circle.creator.as_ref()],
+        seeds = [b"escrow", circle.creator.as_ref(), circle.name.as_bytes()],
         bump = circle.escrow_bump
     )]
     /// CHECK: Escrow account for holding pooled funds
@@ -300,14 +301,14 @@ pub struct ClaimPayout<'info> {
     
     #[account(
         mut,
-        seeds = [b"circle", circle.creator.as_ref()],
+        seeds = [b"circle", circle.creator.as_ref(), circle.name.as_bytes()],
         bump = circle.bump
     )]
     pub circle: Account<'info, Circle>,
     
     #[account(
         mut,
-        seeds = [b"escrow", circle.creator.as_ref()],
+        seeds = [b"escrow", circle.creator.as_ref(), circle.name.as_bytes()],
         bump = circle.escrow_bump
     )]
     /// CHECK: Escrow account for holding pooled funds
@@ -321,7 +322,7 @@ pub struct UpdateFairScore<'info> {
     
     #[account(
         mut,
-        seeds = [b"circle", circle.creator.as_ref()],
+        seeds = [b"circle", circle.creator.as_ref(), circle.name.as_bytes()],
         bump = circle.bump
     )]
     pub circle: Account<'info, Circle>,

@@ -54,7 +54,7 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
     
     setLoading(true);
     try {
-      await joinCircle(circle.creator, fairScore.fair_score);
+      await joinCircle(circle.address, fairScore.fair_score);
     } finally {
       setLoading(false);
     }
@@ -64,7 +64,7 @@ export function CircleCard({ circle, onSelect, showDismiss = false, onDismiss }:
     e.stopPropagation();
     setLoading(true);
     try {
-      await startCircle();
+      await startCircle(circle.address);
     } finally {
       setLoading(false);
     }

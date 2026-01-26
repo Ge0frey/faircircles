@@ -22,7 +22,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [99, 105, 114, 99, 108, 101] },
-              { "kind": "account", "path": "circle.creator", "account": "Circle" }
+              { "kind": "account", "path": "circle.creator", "account": "Circle" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         },
@@ -32,7 +33,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [101, 115, 99, 114, 111, 119] },
-              { "kind": "account", "path": "circle.creator", "account": "Circle" }
+              { "kind": "account", "path": "circle.creator", "account": "Circle" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         }
@@ -51,7 +53,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [99, 105, 114, 99, 108, 101] },
-              { "kind": "account", "path": "circle.creator", "account": "Circle" }
+              { "kind": "account", "path": "circle.creator", "account": "Circle" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         },
@@ -61,7 +64,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [101, 115, 99, 114, 111, 119] },
-              { "kind": "account", "path": "circle.creator", "account": "Circle" }
+              { "kind": "account", "path": "circle.creator", "account": "Circle" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         },
@@ -81,7 +85,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [99, 105, 114, 99, 108, 101] },
-              { "kind": "account", "path": "creator" }
+              { "kind": "account", "path": "creator" },
+              { "kind": "arg", "path": "name" }
             ]
           }
         },
@@ -91,7 +96,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [101, 115, 99, 114, 111, 119] },
-              { "kind": "account", "path": "creator" }
+              { "kind": "account", "path": "creator" },
+              { "kind": "arg", "path": "name" }
             ]
           }
         },
@@ -117,7 +123,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [99, 105, 114, 99, 108, 101] },
-              { "kind": "account", "path": "circle.creator", "account": "Circle" }
+              { "kind": "account", "path": "circle.creator", "account": "Circle" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         }
@@ -136,7 +143,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [99, 105, 114, 99, 108, 101] },
-              { "kind": "account", "path": "creator" }
+              { "kind": "account", "path": "creator" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         }
@@ -155,7 +163,8 @@ export const IDL = {
           "pda": {
             "seeds": [
               { "kind": "const", "value": [99, 105, 114, 99, 108, 101] },
-              { "kind": "account", "path": "circle.creator", "account": "Circle" }
+              { "kind": "account", "path": "circle.creator", "account": "Circle" },
+              { "kind": "account", "path": "circle.name", "account": "Circle" }
             ]
           }
         }
